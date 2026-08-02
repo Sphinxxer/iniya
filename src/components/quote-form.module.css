@@ -1,0 +1,383 @@
+.section {
+  padding-block: var(--section-space);
+  border-bottom: 1px solid var(--line);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(16rem, 0.62fr) minmax(0, 1.38fr);
+  gap: clamp(3rem, 8vw, 9rem);
+  align-items: start;
+}
+
+.intro {
+  position: sticky;
+  top: 8rem;
+}
+
+.kicker,
+.statusLabel {
+  margin: 0 0 1rem;
+  color: var(--ink-soft);
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.kicker::before {
+  width: 1.5rem;
+  height: 2px;
+  background: var(--orange);
+  content: "";
+}
+
+.intro h2 {
+  max-width: 9ch;
+  margin-bottom: 1.6rem;
+  font-size: clamp(2.5rem, 4.8vw, 5.3rem);
+}
+
+.intro > p:not(.kicker) {
+  max-width: 34rem;
+  margin-bottom: 2.5rem;
+  color: var(--ink-soft);
+  font-size: clamp(1rem, 1.2vw, 1.15rem);
+}
+
+.guide {
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+  list-style: none;
+}
+
+.guide li {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.form,
+.success {
+  padding-top: clamp(1.75rem, 3vw, 2.8rem);
+  border-top: 3px solid var(--ink);
+}
+
+.formHeader {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.formHeader h3,
+.success h3 {
+  margin: 0;
+  font-size: clamp(1.8rem, 3vw, 3rem);
+}
+
+.formHeader > p {
+  max-width: 15rem;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  text-align: right;
+}
+
+.required {
+  color: var(--orange-dark);
+  font-weight: 800;
+}
+
+.fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 2.5rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.fieldset legend {
+  width: 100%;
+  margin-bottom: 1.5rem;
+  padding: 0;
+  font-family: var(--font-manrope), Arial, sans-serif;
+  font-size: 1.2rem;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+
+.fieldset legend span {
+  float: right;
+  padding-top: 0.25rem;
+  color: var(--ink-soft);
+  font-family: var(--font-inter), Arial, sans-serif;
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem 1.25rem;
+}
+
+.field {
+  min-width: 0;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.field label,
+.consentField label {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+}
+
+.control {
+  width: 100%;
+  min-height: 3.35rem;
+  padding: 0.78rem 0.9rem;
+  border: 1px solid #aaa69e;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--white) 65%, transparent);
+  color: var(--ink);
+  font-size: 1rem;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease;
+}
+
+.control:hover {
+  border-color: var(--ink-soft);
+}
+
+.control:focus {
+  border-color: var(--ink);
+  background: var(--white);
+}
+
+.control::placeholder {
+  color: #77746e;
+  opacity: 1;
+}
+
+.select {
+  cursor: pointer;
+}
+
+.textarea {
+  min-height: 9rem;
+  resize: vertical;
+}
+
+.controlError {
+  border-color: #a52b20;
+}
+
+.hint,
+.fieldError {
+  margin: 0.45rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.hint {
+  color: var(--ink-soft);
+}
+
+.fieldError {
+  color: #8e2018;
+  font-weight: 650;
+}
+
+.formAlert {
+  margin-top: 1.5rem;
+  padding: 1rem 1.1rem;
+  border-left: 3px solid #a52b20;
+  background: #f5e3dd;
+  color: #641a15;
+  font-size: 0.9rem;
+}
+
+.consentField {
+  display: grid;
+  grid-template-columns: 1.35rem 1fr;
+  gap: 0.8rem;
+  align-items: start;
+  padding: 2rem 0 0;
+}
+
+.consentField input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0.15rem 0 0;
+  accent-color: var(--orange);
+  cursor: pointer;
+}
+
+.consentField label {
+  max-width: 43rem;
+  margin: 0;
+  cursor: pointer;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.turnstile {
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 1.5rem;
+  padding: 0;
+  border: 0;
+}
+
+.submitRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-top: 2rem;
+}
+
+.submitRow p {
+  max-width: 19rem;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+  text-align: right;
+}
+
+.submitButton:disabled {
+  cursor: wait;
+  opacity: 0.65;
+  transform: none;
+}
+
+.success {
+  min-height: 30rem;
+  padding-right: clamp(0rem, 5vw, 5rem);
+}
+
+.successMark {
+  display: grid;
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 3rem;
+  place-items: center;
+  border: 1px solid var(--ink);
+  background: var(--orange);
+  font-size: 1.25rem;
+}
+
+.success > p:not(.statusLabel) {
+  max-width: 36rem;
+  margin: 1.4rem 0 2.2rem;
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+}
+
+.secondaryButton {
+  border-color: var(--ink);
+  background: transparent;
+}
+
+.secondaryButton:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.honeypot {
+  position: absolute !important;
+  left: -10000px !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 4rem;
+  }
+
+  .intro {
+    position: static;
+  }
+
+  .intro h2 {
+    max-width: 12ch;
+  }
+
+  .guide {
+    max-width: 38rem;
+  }
+}
+
+@media (max-width: 620px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .fullWidth {
+    grid-column: auto;
+  }
+
+  .formHeader,
+  .submitRow {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .formHeader > p,
+  .submitRow p {
+    max-width: none;
+    text-align: left;
+  }
+
+  .fieldset legend span {
+    display: block;
+    float: none;
+    margin-top: 0.35rem;
+  }
+
+  .submitButton {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .control {
+    transition: none;
+  }
+}
