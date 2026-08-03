@@ -20,7 +20,7 @@ export default function NotFound() {
           </p>
           <div className="button-row">
             <Link className="button" href="/">
-              Return home <span aria-hidden="true">↗</span>
+              Return home <span aria-hidden="true">→</span>
             </Link>
             <Link className="button button--ghost" href="/products">
               Explore products <span aria-hidden="true">→</span>

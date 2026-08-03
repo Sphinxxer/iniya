@@ -110,7 +110,7 @@ export function SiteHeader() {
 
           <div className="site-header__actions">
             <Link className="button button--small desktop-quote" href="/contact">
-              Request a quote <span aria-hidden="true">↗</span>
+              Request a quote <span aria-hidden="true">&rarr;</span>
             </Link>
             <button
               ref={triggerRef}
@@ -157,7 +157,7 @@ export function SiteHeader() {
               aria-label="Close navigation"
               onClick={() => closeNavigation()}
             >
-              <span aria-hidden="true">×</span>
+              <span aria-hidden="true">&times;</span>
             </button>
           </div>
           <nav aria-label="Mobile navigation">
@@ -181,7 +181,7 @@ export function SiteHeader() {
             tabIndex={open ? 0 : -1}
             onClick={() => closeNavigation(false)}
           >
-            Request a quote <span aria-hidden="true">↗</span>
+            Request a quote <span aria-hidden="true">&rarr;</span>
           </Link>
           <p className="mobile-nav__location">Tirupur, India</p>
         </div>

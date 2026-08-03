@@ -20,7 +20,7 @@ export function SectionHeading({
         {copy ? <p>{copy}</p> : null}
         {action ? (
           <Link className="text-link" href={action.href}>
-            {action.label} <span aria-hidden="true">↗</span>
+            {action.label} <span aria-hidden="true">→</span>
           </Link>
         ) : null}
       </div>
@@ -71,7 +71,7 @@ export function CtaSection({
           <p>{copy}</p>
           <div className="button-row">
             <Link className="button" href={primary.href}>
-              {primary.label} <span aria-hidden="true">↗</span>
+              {primary.label} <span aria-hidden="true">→</span>
             </Link>
             {secondary ? (
               <Link className="button button--ghost-dark" href={secondary.href}>
@@ -89,29 +89,33 @@ export function CapabilityStrip() {
   const text =
     "IN-HOUSE PROCESSING · CUSTOM SPECIFICATIONS · QUALITY TESTING · RECYCLED MATERIALS · SPECIALITY FIBRES";
   return (
-    <div className="capability-strip" aria-label={text}>
+    <section className="capability-strip" aria-label="Core capabilities">
+      <p className="visually-hidden">
+        In-house processing, custom specifications, quality testing, recycled
+        materials, and speciality fibres.
+      </p>
       <div className="capability-strip__track" aria-hidden="true">
         <span>{text}</span>
         <span>{text}</span>
         <span>{text}</span>
         <span>{text}</span>
       </div>
-    </div>
+    </section>
   );
 }
 
 export function ProcessFlow({ compact = false }: { compact?: boolean }) {
   const steps = [
     {
-      title: "Customer requirement",
-      copy: "Product, specification, and quantity are confirmed.",
+      title: "Customer specification",
+      copy: "Product, material parameters, and quantity are discussed.",
     },
     {
       title: "In-house processing",
       copy: "Applicable operations are planned and managed internally.",
     },
     {
-      title: "Applicable laboratory checks",
+      title: "Laboratory testing",
       copy: "Yarn checks are completed where they apply to the product.",
     },
     {
@@ -120,16 +124,13 @@ export function ProcessFlow({ compact = false }: { compact?: boolean }) {
     },
     {
       title: "Supply and dispatch",
-      copy: "The order moves forward against the agreed delivery requirement.",
+      copy: "The order moves forward against the agreed supply details.",
     },
   ];
   return (
     <ol className={`process-flow reveal${compact ? " process-flow--compact" : ""}`}>
-      {steps.map((step, index) => (
+      {steps.map((step) => (
         <li key={step.title}>
-          <span className="process-flow__index" aria-hidden="true">
-            {String(index + 1).padStart(2, "0")}
-          </span>
           <div className="process-flow__content">
             <strong>{step.title}</strong>
             <p>{step.copy}</p>
@@ -159,12 +160,10 @@ export function Breadcrumbs({
 }
 
 export function ProductVisual({
-  name,
   alt,
   image,
   large = false,
 }: {
-  name: string;
   alt: string;
   image: string;
   large?: boolean;
@@ -184,7 +183,6 @@ export function ProductVisual({
         priority={large}
         unoptimized
       />
-      <span className="product-visual__name">{name}</span>
     </div>
   );
 }
@@ -196,7 +194,6 @@ export function ProductCard({
   product: {
     name: string;
     slug: string;
-    category: string;
     shortDescription: string;
     image: string;
     imageAlt: string;
@@ -208,21 +205,22 @@ export function ProductCard({
     <article className={`product-card reveal${featured ? " is-featured" : ""}`}>
       <Link href={`/products/${product.slug}`} aria-label={`View ${product.name}`}>
         <ProductVisual
-          name={product.name}
           image={product.image}
           alt={product.imageAlt}
         />
       </Link>
       <div className="product-card__body">
-        <p className="eyebrow">{product.category}</p>
         <h3>
           <Link href={`/products/${product.slug}`}>{product.name}</Link>
         </h3>
         <p>{product.shortDescription}</p>
         <div className="product-card__meta">
           <Link href={`/products/${product.slug}`}>
-            {product.countRange ?? "View product"}
+            View <span aria-hidden="true">→</span>
           </Link>
+          {product.countRange ? (
+            <span className="product-card__badge">{product.countRange}</span>
+          ) : null}
         </div>
       </div>
     </article>

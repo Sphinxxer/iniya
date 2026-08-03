@@ -6,7 +6,12 @@ import {
   useRef,
   useState,
 } from "react";
-import { products, type ProductSlug } from "@/src/data/products";
+import Link from "next/link";
+import {
+  getProductBySlug,
+  products,
+  type ProductSlug,
+} from "@/src/data/products";
 import styles from "./quote-form.module.css";
 
 type TurnstileApi = {
@@ -50,6 +55,22 @@ const validCustomerTypes = new Set<string>(customerTypes);
 const validProducts = new Set<string>(
   productOptions.map((product) => product.value),
 );
+
+const optionalSpecificationFields = [
+  { key: "fibreType", label: "Fibre type", maxLength: 120, placeholder: undefined },
+  { key: "blend", label: "Blend", maxLength: 120, placeholder: undefined },
+  { key: "colour", label: "Colour", maxLength: 120, placeholder: undefined },
+  {
+    key: "yarnCount",
+    label: "Yarn count",
+    maxLength: 80,
+    placeholder: "For example, 20s",
+  },
+  { key: "grade", label: "Grade", maxLength: 120, placeholder: undefined },
+] as const;
+
+type OptionalSpecificationKey =
+  (typeof optionalSpecificationFields)[number]["key"];
 
 type FormValues = {
   fullName: string;
@@ -100,6 +121,18 @@ function initialValues(initialProduct?: ProductSlug): FormValues {
     consent: false,
     website: "",
   };
+}
+
+function getOptionalFieldsForProduct(productSlug: string) {
+  if (productSlug === "other") return optionalSpecificationFields;
+
+  const selectedProduct = getProductBySlug(productSlug);
+
+  if (!selectedProduct) return [];
+
+  return optionalSpecificationFields.filter((field) =>
+    selectedProduct.enquiryFields.includes(field.label),
+  );
 }
 
 function validateForm(
@@ -291,6 +324,34 @@ export function QuoteForm({
     }
   }
 
+  function updateProduct(value: string) {
+    const availableFields = new Set(
+      getOptionalFieldsForProduct(value).map((field) => field.key),
+    );
+
+    setValues((current) => {
+      const next = { ...current, product: value };
+      optionalSpecificationFields.forEach((field) => {
+        if (!availableFields.has(field.key)) {
+          next[field.key] = "";
+        }
+      });
+      return next;
+    });
+
+    if (errors.product) {
+      setErrors((current) => {
+        const next = { ...current };
+        delete next.product;
+        return next;
+      });
+    }
+    if (status === "error") {
+      setStatus("idle");
+      setFormMessage("");
+    }
+  }
+
   function validateField(field: ErrorKey) {
     const message = validateForm(
       values,
@@ -399,6 +460,7 @@ export function QuoteForm({
     [hintId, errors[field] ? `quote-${field}-error` : undefined]
       .filter(Boolean)
       .join(" ") || undefined;
+  const visibleOptionalFields = getOptionalFieldsForProduct(values.product);
 
   return (
     <section className={styles.section} aria-labelledby="quote-form-heading">
@@ -631,9 +693,7 @@ export function QuoteForm({
                     id="quote-product"
                     name="product"
                     value={values.product}
-                    onChange={(event) =>
-                      updateField("product", event.target.value)
-                    }
+                    onChange={(event) => updateProduct(event.target.value)}
                     onBlur={() => validateField("product")}
                     required
                     aria-invalid={Boolean(errors.product)}
@@ -699,94 +759,45 @@ export function QuoteForm({
 
             <fieldset className={styles.fieldset}>
               <legend>
-                Optional specifications <span>Include only what applies</span>
+                Relevant optional details <span>Include only what applies</span>
               </legend>
-              <div className={styles.grid}>
-                <div className={styles.field}>
-                  <label htmlFor="quote-fibreType">Fibre type</label>
-                  <input
-                    className={styles.control}
-                    id="quote-fibreType"
-                    name="fibreType"
-                    type="text"
-                    maxLength={120}
-                    value={values.fibreType}
-                    onChange={(event) =>
-                      updateField("fibreType", event.target.value)
-                    }
-                  />
+              {visibleOptionalFields.length > 0 ? (
+                <div className={styles.grid}>
+                  {visibleOptionalFields.map((field) => (
+                    <div className={styles.field} key={field.key}>
+                      <label htmlFor={`quote-${field.key}`}>{field.label}</label>
+                      <input
+                        className={styles.control}
+                        id={`quote-${field.key}`}
+                        name={field.key}
+                        type="text"
+                        maxLength={field.maxLength}
+                        placeholder={field.placeholder}
+                        value={values[field.key]}
+                        onChange={(event) =>
+                          updateField(
+                            field.key as OptionalSpecificationKey,
+                            event.target.value,
+                          )
+                        }
+                      />
+                    </div>
+                  ))}
                 </div>
-
-                <div className={styles.field}>
-                  <label htmlFor="quote-blend">Blend</label>
-                  <input
-                    className={styles.control}
-                    id="quote-blend"
-                    name="blend"
-                    type="text"
-                    maxLength={120}
-                    value={values.blend}
-                    onChange={(event) =>
-                      updateField("blend", event.target.value)
-                    }
-                  />
-                </div>
-
-                <div className={styles.field}>
-                  <label htmlFor="quote-colour">Colour</label>
-                  <input
-                    className={styles.control}
-                    id="quote-colour"
-                    name="colour"
-                    type="text"
-                    maxLength={120}
-                    value={values.colour}
-                    onChange={(event) =>
-                      updateField("colour", event.target.value)
-                    }
-                  />
-                </div>
-
-                <div className={styles.field}>
-                  <label htmlFor="quote-yarnCount">Yarn count</label>
-                  <input
-                    className={styles.control}
-                    id="quote-yarnCount"
-                    name="yarnCount"
-                    type="text"
-                    maxLength={80}
-                    placeholder="For example, 20s"
-                    value={values.yarnCount}
-                    onChange={(event) =>
-                      updateField("yarnCount", event.target.value)
-                    }
-                  />
-                </div>
-
-                <div className={styles.field}>
-                  <label htmlFor="quote-grade">Grade</label>
-                  <input
-                    className={styles.control}
-                    id="quote-grade"
-                    name="grade"
-                    type="text"
-                    maxLength={120}
-                    value={values.grade}
-                    onChange={(event) =>
-                      updateField("grade", event.target.value)
-                    }
-                  />
-                </div>
-              </div>
+              ) : (
+                <p className={styles.optionalNotice}>
+                  Select a product above to see the optional details that are
+                  relevant to it.
+                </p>
+              )}
             </fieldset>
 
-            <div className={styles.honeypot} aria-hidden="true">
-              <label htmlFor="quote-website">Leave this field empty</label>
+            <div hidden aria-hidden="true">
               <input
                 id="quote-website"
                 name="website"
                 type="text"
-                autoComplete="off"
+                autoComplete="new-password"
                 tabIndex={-1}
                 value={values.website}
                 onChange={(event) =>
@@ -812,7 +823,8 @@ export function QuoteForm({
               <div>
                 <label htmlFor="quote-consent">
                   I consent to Iniya Fiber using these details to respond to my
-                  enquiry. <RequiredMarker />
+                  enquiry. See the <Link href="/privacy">privacy policy</Link>.
+                  <RequiredMarker />
                 </label>
                 <FieldError field="consent" errors={errors} />
               </div>

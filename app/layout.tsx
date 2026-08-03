@@ -7,7 +7,11 @@ import { SiteHeader } from "@/src/components/site-header";
 import { ScrollProgress } from "@/src/components/scroll-progress";
 import { StructuredData } from "@/src/components/structured-data";
 import { siteConfig } from "@/src/config/site";
-import { getConfiguredSiteUrl } from "@/src/lib/metadata";
+import {
+  getCanonicalUrl,
+  getConfiguredSiteUrl,
+  isVercelPreviewHost,
+} from "@/src/lib/metadata";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -27,43 +31,35 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-async function resolveMetadataBase() {
-  const configured = getConfiguredSiteUrl();
-  if (configured) return configured;
-
+export async function generateMetadata(): Promise<Metadata> {
+  const configuredSiteUrl = getConfiguredSiteUrl();
   const requestHeaders = await headers();
   const host =
     requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
-  if (!host) return undefined;
-  const protocol = requestHeaders.get("x-forwarded-proto") ?? "https";
-  try {
-    return new URL(`${protocol}://${host}`);
-  } catch {
-    return undefined;
-  }
-}
-
-export async function generateMetadata(): Promise<Metadata> {
-  const metadataBase = await resolveMetadataBase();
-  const title = "Iniya Fiber | Fibres and yarns, made to specification";
+  const isPreview = isVercelPreviewHost(host);
+  const title = "Iniya Fiber | Recycled Fibres & Yarn Manufacturer in Tirupur";
   const description =
     "Iniya Fiber manufactures and supplies recycled textile materials, processed fibres, and customised yarn solutions from Tirupur, India.";
-  const socialImage = metadataBase
-    ? new URL("/og.png", metadataBase).toString()
+  const socialImage = configuredSiteUrl
+    ? new URL("/og.png", configuredSiteUrl).toString()
     : undefined;
+  const canonical = getCanonicalUrl("/");
 
   return {
-    metadataBase,
+    metadataBase: configuredSiteUrl,
     title: {
       default: title,
       template: "%s | Iniya Fiber",
     },
     description,
+    alternates: canonical ? { canonical } : undefined,
+    robots: isPreview ? { index: false, follow: false } : undefined,
     openGraph: {
       type: "website",
       siteName: siteConfig.companyName,
       title,
       description,
+      url: canonical,
       images: socialImage
         ? [
             {
@@ -93,18 +89,30 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "Organization",
     name: siteConfig.companyName,
+    ...(siteConfig.registeredBusinessName
+      ? { legalName: siteConfig.registeredBusinessName }
+      : {}),
     description: siteConfig.description,
+    ...(siteConfig.email ? { email: siteConfig.email } : {}),
+    ...(siteConfig.phone ? { telephone: siteConfig.phone } : {}),
     address: {
       "@type": "PostalAddress",
+      ...(siteConfig.streetAddress
+        ? { streetAddress: siteConfig.streetAddress }
+        : {}),
       addressLocality: "Tirupur",
       addressCountry: "IN",
     },
+    ...(siteConfig.googleMapsUrl ? { hasMap: siteConfig.googleMapsUrl } : {}),
   };
   const websiteData = {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: siteConfig.companyName,
     description: siteConfig.description,
+    ...(getConfiguredSiteUrl()
+      ? { url: getConfiguredSiteUrl()?.toString() }
+      : {}),
   };
 
   return (

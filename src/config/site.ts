@@ -5,10 +5,12 @@ export type SocialAccount = {
 
 export type SiteConfig = {
   readonly companyName: string;
+  readonly registeredBusinessName?: string;
   readonly location: string;
   readonly email?: string;
   readonly phone?: string;
   readonly whatsapp?: string;
+  readonly whatsappUrl?: string;
   readonly streetAddress?: string;
   readonly googleMapsUrl?: string;
   readonly siteUrl?: string;
@@ -20,10 +22,12 @@ export type SiteConfig = {
 
 export const siteConfig = {
   companyName: "Iniya Fiber",
+  registeredBusinessName: "",
   location: "Tirupur, India",
   email: "",
   phone: "",
   whatsapp: "",
+  whatsappUrl: "",
   streetAddress: "",
   googleMapsUrl: "",
   siteUrl: "",

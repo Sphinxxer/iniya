@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
-import { products } from "@/src/data/products";
+import {
+  getProductsInGroup,
+  productGroups,
+} from "@/src/data/products";
 import { createPageMetadata } from "@/src/lib/metadata";
 import {
   CtaSection,
   PageHero,
   ProductCard,
-  SectionHeading,
 } from "@/src/components/ui";
 
 export const metadata: Metadata = createPageMetadata({
-  title: "Textile materials and yarn products",
+  title: "Recycled materials, fibres and yarns",
   description:
-    "Explore recycled cotton waste, processed fibres, recycled yarn, cotton yarn, coloured yarn, and poly-cotton yarn from Iniya Fiber.",
+    "Explore Iniya Fiber’s recycled textile materials, processed fibres, and yarn solutions for specification-led supply discussions.",
   path: "/products",
 });
 
@@ -20,23 +22,34 @@ export default function ProductsPage() {
     <>
       <PageHero
         title="Recycled materials, processed fibres, and yarn solutions."
-        copy="Explore the Iniya Fiber product range and enquire based on fibre type, blend, colour, count, grade, and quantity."
+        copy="Browse the seven product categories, then start an enquiry with the product, applicable specification, and quantity you need."
       />
 
       <section className="section">
         <div className="shell">
-          <SectionHeading
-            title="Seven focused material categories."
-            copy="Each enquiry starts with the product and specifications your production requires. Product details below are limited to confirmed capabilities."
-          />
-          <div className="product-grid">
-            {products.map((product, index) => (
-              <ProductCard
-                key={product.slug}
-                product={product}
-                featured={index === 0}
-              />
-            ))}
+          <div className="product-groups product-groups--index">
+            {productGroups.map((group) => {
+              const groupedProducts = getProductsInGroup(group.id);
+              return (
+                <section className="product-group" key={group.id} aria-labelledby={`${group.id}-products-heading`}>
+                  <div className="product-group__heading">
+                    <h2 id={`${group.id}-products-heading`}>{group.label}</h2>
+                    <p>{group.copy}</p>
+                  </div>
+                  <div
+                    className={`product-grid${groupedProducts.length === 1 ? " product-grid--single" : ""}`}
+                  >
+                    {groupedProducts.map((product) => (
+                      <ProductCard
+                        key={product.slug}
+                        product={product}
+                        featured={product.priority === 1}
+                      />
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -44,11 +57,10 @@ export default function ProductsPage() {
       <section className="section section--paper-deep">
         <div className="shell product-index-note reveal">
           <div>
-            <h2>Start with the material. Define the specification.</h2>
+            <h2>Start with the product. Add the details that apply.</h2>
             <p>
-              Discuss applicable requirements across fibre type, blend, colour,
-              yarn count, grade, and quantity. The Iniya Fiber team will respond
-              around the selected product and confirmed production need.
+              Each product page shows the relevant material parameters and the
+              information that helps Iniya Fiber review an enquiry clearly.
             </p>
           </div>
         </div>
@@ -56,7 +68,7 @@ export default function ProductsPage() {
 
       <CtaSection
         title="Need help selecting the right product?"
-        copy="Share the material and production requirement, and begin a product-specific supply discussion."
+        copy="Tell us what you need to source, the material details that apply, and the quantity you are planning for."
       />
     </>
   );

@@ -5,7 +5,7 @@ import { products, type ProductSlug } from "@/src/data/products";
 import { createPageMetadata } from "@/src/lib/metadata";
 
 export const metadata: Metadata = createPageMetadata({
-  title: "Request a Quote",
+  title: "Request a textile material quote",
   description:
     "Share your textile material, yarn specification, and quantity requirements with Iniya Fiber in Tirupur, India.",
   path: "/contact",
@@ -39,8 +39,8 @@ export default async function ContactPage({
   return (
     <>
       <PageHero
-        title="Tell us what your production requires."
-        copy="Share your product, specification, and quantity requirements with the Iniya Fiber team."
+        title="Start a textile supply enquiry."
+        copy="Share the product, quantity, and relevant specification details. The Iniya Fiber team can review the requirement and respond using your business contact details."
       />
       <QuoteForm
         key={initialProduct ?? "general-enquiry"}

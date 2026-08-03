@@ -4,6 +4,7 @@ import { siteConfig } from "@/src/config/site";
 export function getConfiguredSiteUrl() {
   const value = process.env.NEXT_PUBLIC_SITE_URL || siteConfig.siteUrl;
   if (!value) return undefined;
+
   try {
     return new URL(value);
   } catch {
@@ -11,28 +12,38 @@ export function getConfiguredSiteUrl() {
   }
 }
 
+export function isVercelPreviewHost(host: string | null | undefined) {
+  return Boolean(host?.replace(/:\d+$/, "").endsWith(".vercel.app"));
+}
+
+export function getCanonicalUrl(path: string) {
+  const base = getConfiguredSiteUrl();
+  return base ? new URL(path, base).toString() : undefined;
+}
+
 export function createPageMetadata({
   title,
   description,
   path,
+  absoluteTitle = false,
 }: {
   title: string;
   description: string;
   path: string;
+  absoluteTitle?: boolean;
 }): Metadata {
-  const base = getConfiguredSiteUrl();
-  const url = base ? new URL(path, base).toString() : undefined;
+  const url = getCanonicalUrl(path);
 
   return {
-    title,
+    title: absoluteTitle ? { absolute: title } : title,
     description,
-    alternates: { canonical: url ?? path },
+    alternates: url ? { canonical: url } : undefined,
     openGraph: {
       title,
       description,
       type: "website",
       siteName: siteConfig.companyName,
-      url: url ?? path,
+      url,
     },
     twitter: {
       card: "summary_large_image",

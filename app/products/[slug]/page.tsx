@@ -10,8 +10,9 @@ import {
 } from "@/src/components/ui";
 import {
   getProductBySlug,
-  products,
+  productGroups,
   productSlugs,
+  type Product,
 } from "@/src/data/products";
 import { createPageMetadata, getConfiguredSiteUrl } from "@/src/lib/metadata";
 
@@ -48,21 +49,23 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const product = getProductBySlug(slug);
   if (!product) notFound();
 
-  const currentIndex = products.findIndex((item) => item.slug === product.slug);
-  const relatedProducts = [1, 2, 3].map(
-    (offset) => products[(currentIndex + offset) % products.length],
-  );
+  const relatedProducts = product.relatedSlugs
+    .map((relatedSlug) => getProductBySlug(relatedSlug))
+    .filter((item): item is Product => Boolean(item));
+  const group = productGroups.find((item) => item.id === product.group);
   const siteUrl = getConfiguredSiteUrl();
   const productUrl = siteUrl
     ? new URL(`/products/${product.slug}`, siteUrl).toString()
     : undefined;
+  const relatedHeading = `Related ${(group?.label ?? "products").toLowerCase()} to explore.`;
 
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
     description: product.longDescription,
-    category: product.category,
+    category: group?.label ?? product.category,
+    image: siteUrl ? new URL(product.image, siteUrl).toString() : undefined,
     brand: {
       "@type": "Brand",
       name: "Iniya Fiber",
@@ -83,6 +86,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
       {
         "@type": "ListItem",
         position: 3,
+        name: group?.label ?? product.category,
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
         name: product.name,
         item: productUrl,
       },
@@ -97,16 +105,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
             items={[
               { label: "Home", href: "/" },
               { label: "Products", href: "/products" },
+              { label: group?.label ?? product.category },
               { label: product.name },
             ]}
           />
           <div className="product-detail-hero__grid">
             <div className="product-detail-hero__copy">
+              <p className="eyebrow">{group?.label ?? product.category}</p>
               <h1>{product.name}</h1>
               <p>{product.longDescription}</p>
               {product.countRange ? (
                 <div className="confirmed-range">
-                  <span>Confirmed count range</span>
+                  <span>Available yarn count</span>
                   <strong>{product.countRange}</strong>
                 </div>
               ) : null}
@@ -114,11 +124,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 className="button"
                 href={`/contact?product=${encodeURIComponent(product.slug)}`}
               >
-                Request details <span aria-hidden="true">↗</span>
+                Request a quote <span aria-hidden="true">→</span>
               </Link>
             </div>
             <ProductVisual
-              name={product.name}
               image={product.image}
               alt={product.imageAlt}
               large
@@ -130,13 +139,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <section className="section section--line">
         <div className="shell product-spec-grid">
           <div>
-            <h2>Discuss the applicable specification.</h2>
+            <h2>Applicable product details.</h2>
           </div>
           <div className="specification-list">
-            {product.availableCustomisation.map((option) => (
-              <div className="specification-row" key={option}>
-                <strong>{option}</strong>
-                <p>Configured around the confirmed product requirement.</p>
+            {product.specifications.map((specification) => (
+              <div className="specification-row" key={specification.label}>
+                <strong>{specification.label}</strong>
+                <p>{specification.copy}</p>
               </div>
             ))}
           </div>
@@ -146,15 +155,24 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <section className="section section--paper-deep">
         <div className="shell product-info-grid">
           <article>
-            <h3>Specification backed by internal review.</h3>
+            <h3>Internal quality review</h3>
             <p>{product.qualityNote}</p>
           </article>
           <article>
-            <h3>Supplied for textile businesses.</h3>
+            <h3>Relevant customer groups</h3>
             <ul>
-              {product.customerGroups.map((group) => (
-                <li key={group}>{group}</li>
+              {product.customerGroups.map((customerGroup) => (
+                <li key={customerGroup}>{customerGroup}</li>
               ))}
+            </ul>
+          </article>
+          <article>
+            <h3>Include these details in your enquiry</h3>
+            <ul>
+              {product.enquiryFields.map((field) => (
+                <li key={field}>{field}</li>
+              ))}
+              <li>Quantity and unit</li>
             </ul>
           </article>
         </div>
@@ -164,26 +182,26 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <div className="shell">
           <div className="related-products__heading">
             <div>
-              <h2>Continue exploring the range.</h2>
+              <h2>{relatedHeading}</h2>
             </div>
             <Link className="text-link" href="/products">
-              View all products <span aria-hidden="true">↗</span>
+              View all products <span aria-hidden="true">→</span>
             </Link>
           </div>
           <div className="product-grid">
-            {relatedProducts.map((item) => (
-              <ProductCard key={item.slug} product={item} />
+            {relatedProducts.map((relatedProduct) => (
+              <ProductCard key={relatedProduct.slug} product={relatedProduct} />
             ))}
           </div>
         </div>
       </section>
 
       <CtaSection
-        title={`Discuss ${product.name.toLowerCase()} requirements.`}
-        copy="Share the applicable specification and quantity so the Iniya Fiber team can respond around the requirement."
+        title={`Discuss ${product.name.toLowerCase()}.`}
+        copy="Share the product, applicable specification, quantity, and business details so the team can review your supply enquiry clearly."
         primary={{
           href: `/contact?product=${encodeURIComponent(product.slug)}`,
-          label: `Request details for ${product.name}`,
+          label: `Request a quote for ${product.name}`,
         }}
       />
 

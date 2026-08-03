@@ -4,16 +4,37 @@ import { navigation } from "@/src/data/navigation";
 import { products } from "@/src/data/products";
 import { Brand } from "./brand";
 
+type ContactRow = {
+  label: string;
+  value: string;
+  href: string;
+};
+
 export function SiteFooter() {
   const year = new Date().getFullYear();
   const contactRows = [
     siteConfig.email
-      ? { label: "Email", value: siteConfig.email, href: `mailto:${siteConfig.email}` }
+      ? {
+          label: "Email",
+          value: siteConfig.email,
+          href: `mailto:${siteConfig.email}`,
+        }
       : null,
     siteConfig.phone
-      ? { label: "Phone", value: siteConfig.phone, href: `tel:${siteConfig.phone}` }
+      ? {
+          label: "Phone",
+          value: siteConfig.phone,
+          href: `tel:${siteConfig.phone}`,
+        }
       : null,
-  ].filter(Boolean) as { label: string; value: string; href: string }[];
+    siteConfig.whatsapp && siteConfig.whatsappUrl
+      ? {
+          label: "WhatsApp",
+          value: siteConfig.whatsapp,
+          href: siteConfig.whatsappUrl,
+        }
+      : null,
+  ].filter(Boolean) as ContactRow[];
 
   return (
     <footer className="site-footer">
@@ -25,7 +46,7 @@ export function SiteFooter() {
             processed fibres, and customised yarn solutions from Tirupur, India.
           </p>
           <Link className="button button--small" href="/contact">
-            Request a quote <span aria-hidden="true">↗</span>
+            Request a quote <span aria-hidden="true">&rarr;</span>
           </Link>
         </div>
 
@@ -52,7 +73,18 @@ export function SiteFooter() {
           </div>
           <div>
             <p className="eyebrow">Location</p>
-            <p>{siteConfig.location}</p>
+            {siteConfig.googleMapsUrl ? (
+              <a
+                href={siteConfig.googleMapsUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {siteConfig.location} <span aria-hidden="true">↗</span>
+              </a>
+            ) : (
+              <p>{siteConfig.location}</p>
+            )}
+            {siteConfig.streetAddress ? <p>{siteConfig.streetAddress}</p> : null}
             {contactRows.map((row) => (
               <a key={row.label} href={row.href}>
                 {row.value}
@@ -63,6 +95,9 @@ export function SiteFooter() {
       </div>
       <div className="shell site-footer__bottom">
         <p>© {year} Iniya Fiber. All rights reserved.</p>
+        <Link className="site-footer__legal-link" href="/privacy">
+          Privacy
+        </Link>
         <p>Manufacturer · Supplier · Trader · Exporter</p>
       </div>
     </footer>
