@@ -1,14 +1,13 @@
 import {
   getConfiguredSiteUrl,
-  isVercelPreviewHost,
+  shouldIndexHost,
 } from "@/src/lib/metadata";
 
 export function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const configuredSiteUrl = getConfiguredSiteUrl();
-  const isPreview =
-    isVercelPreviewHost(requestUrl.hostname) || !configuredSiteUrl;
-  const body = isPreview
+  const indexingEnabled = shouldIndexHost(requestUrl.host);
+  const body = !indexingEnabled
     ? ["User-agent: *", "Disallow: /", ""].join("\n")
     : [
         "User-agent: *",
@@ -22,7 +21,7 @@ export function GET(request: Request) {
     headers: {
       "Content-Type": "text/plain; charset=utf-8",
       "Cache-Control": "public, max-age=3600",
-      "X-Robots-Tag": isPreview ? "noindex, nofollow" : "all",
+      "X-Robots-Tag": indexingEnabled ? "all" : "noindex, nofollow",
     },
   });
 }

@@ -1,86 +1,166 @@
+import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PageHero, SectionHeading } from "@/src/components/ui";
 import { siteConfig } from "@/src/config/site";
 import { createPageMetadata } from "@/src/lib/metadata";
 
-export const metadata: Metadata = createPageMetadata({
+export async function generateMetadata(): Promise<Metadata> {
+  return createPageMetadata({
   title: "Privacy",
   description:
     "How Iniya Fiber uses the details submitted through its textile supply enquiry form.",
   path: "/privacy",
-});
+  });
+}
+
+const readingColumn: CSSProperties = {
+  maxWidth: "48rem",
+};
+
+const pageTitle: CSSProperties = {
+  maxWidth: "11ch",
+  marginBottom: "1.5rem",
+  fontSize: "clamp(3rem, 6vw, 6.5rem)",
+};
+
+const introduction: CSSProperties = {
+  maxWidth: "42rem",
+  marginBottom: 0,
+  color: "var(--ink-soft)",
+  fontSize: "clamp(1.05rem, 1.4vw, 1.3rem)",
+};
+
+const policySection: CSSProperties = {
+  padding: "clamp(2rem, 4vw, 3.5rem) 0",
+  borderBottom: "1px solid var(--line)",
+};
+
+const policyHeading: CSSProperties = {
+  marginBottom: "1rem",
+  fontSize: "clamp(1.6rem, 3vw, 2.6rem)",
+};
+
+const policyCopy: CSSProperties = {
+  maxWidth: "42rem",
+  marginBottom: 0,
+  color: "var(--ink-soft)",
+};
 
 export default function PrivacyPage() {
+  const privacyContactEmail = siteConfig.privacyEmail || siteConfig.email;
+
   return (
     <>
-      <PageHero
-        title="Privacy for supply enquiries."
-        copy="This notice explains how Iniya Fiber handles the details you submit through this website's enquiry form."
-      />
-
-      <section className="section">
+      <section
+        className="section section--line"
+        style={{ padding: "clamp(3.75rem, 6vw, 6rem) 0" }}
+      >
         <div className="shell">
-          <SectionHeading
-            title="What we collect."
-            copy="When you send an enquiry, we collect the business contact and requirement details you provide, such as your name, company, email address, phone number, country, product, quantity, and specification notes."
-          />
-        </div>
-      </section>
-
-      <section className="section section--line section--paper-deep">
-        <div className="shell">
-          <div className="policy-grid">
-            <article>
-              <h2>How the details are used</h2>
-              <p>
-                We use submitted details to review the requirement, respond to
-                the enquiry, and keep an appropriate business record of the
-                discussion. We do not sell enquiry details.
-              </p>
-            </article>
-            <article>
-              <h2>How long they are kept</h2>
-              <p>
-                Details are kept only for as long as reasonably necessary to
-                respond, follow up on the enquiry, and maintain relevant
-                business records.
-              </p>
-            </article>
-            <article>
-              <h2>Service providers</h2>
-              <p>
-                The website uses technical service providers to operate the
-                enquiry form and deliver submitted enquiries to Iniya Fiber.
-              </p>
-            </article>
-            <article>
-              <h2>Your choices</h2>
-              <p>
-                You can ask about, correct, or request deletion of the details
-                you submitted by contacting Iniya Fiber through the route below.
-              </p>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section className="section section--line">
-        <div className="shell">
-          <SectionHeading
-            title="Privacy contact."
-            copy={
-              siteConfig.email
-                ? `For privacy questions, contact Iniya Fiber at ${siteConfig.email}.`
-                : "For privacy questions or requests about an enquiry, use the contact form and include the email address used in the original submission."
-            }
-            action={{ href: "/contact", label: "Contact Iniya Fiber" }}
-          />
-          {siteConfig.email ? (
-            <p className="privacy-contact-link">
-              <Link href={`mailto:${siteConfig.email}`}>{siteConfig.email}</Link>
+          <header style={readingColumn}>
+            <p className="eyebrow">Privacy</p>
+            <h1 style={pageTitle}>Privacy for supply enquiries.</h1>
+            <p style={introduction}>
+              This notice explains how Iniya Fiber handles details submitted
+              through the website enquiry form.
             </p>
-          ) : null}
+            {siteConfig.privacyEffectiveDate ? (
+              <p style={{ ...policyCopy, marginTop: "1.5rem" }}>
+                Effective date: <strong>{siteConfig.privacyEffectiveDate}</strong>
+              </p>
+            ) : null}
+            {siteConfig.registeredBusinessName ? (
+              <p style={{ ...policyCopy, marginTop: "1.5rem" }}>
+                Business responsible for the enquiry: {" "}
+                <strong>{siteConfig.registeredBusinessName}</strong>.
+              </p>
+            ) : null}
+          </header>
+        </div>
+      </section>
+
+      <section
+        className="section section--line section--paper-deep"
+        style={{ padding: "clamp(3.75rem, 6vw, 6rem) 0" }}
+      >
+        <div className="shell">
+          <article style={readingColumn}>
+            <section style={{ ...policySection, paddingTop: 0 }}>
+              <h2 style={policyHeading}>What we collect</h2>
+              <p style={policyCopy}>
+                An enquiry includes the name, company, business email, product,
+                quantity, requirement notes, and consent you provide. It may
+                also include a phone number, country, customer type, and
+                product-specific details when you choose to add them.
+              </p>
+            </section>
+
+            <section style={policySection}>
+              <h2 style={policyHeading}>How the details are used</h2>
+              <p style={policyCopy}>
+                Submitted details are used to review the requirement, respond
+                to the enquiry, and maintain an appropriate business record of
+                the discussion. Iniya Fiber does not sell enquiry details.
+              </p>
+            </section>
+
+            {siteConfig.privacyRetentionPeriod ? (
+              <section style={policySection}>
+                <h2 style={policyHeading}>Retention</h2>
+                <p style={policyCopy}>{siteConfig.privacyRetentionPeriod}</p>
+              </section>
+            ) : null}
+
+            {siteConfig.privacyServiceProviders.length > 0 ? (
+              <section style={policySection}>
+                <h2 style={policyHeading}>Service providers</h2>
+                <p style={policyCopy}>
+                  Submitted information may be processed by {" "}
+                  {siteConfig.privacyServiceProviders.join(", ")} to operate the
+                  enquiry service.
+                </p>
+              </section>
+            ) : null}
+
+            {siteConfig.cookieAnalyticsStatement ? (
+              <section style={policySection}>
+                <h2 style={policyHeading}>Cookies and analytics</h2>
+                <p style={policyCopy}>{siteConfig.cookieAnalyticsStatement}</p>
+              </section>
+            ) : null}
+
+            <section style={policySection}>
+              <h2 style={policyHeading}>Your choices</h2>
+              <p style={policyCopy}>
+                You can ask about, correct, or request deletion of details you
+                submitted. Include the business email used in the original
+                enquiry so the request can be identified.
+              </p>
+            </section>
+
+            <section style={{ ...policySection, borderBottom: 0 }}>
+              <h2 style={policyHeading}>Privacy contact</h2>
+              {privacyContactEmail ? (
+                <p style={policyCopy}>
+                  Email {" "}
+                  <Link
+                    className="text-link"
+                    href={`mailto:${privacyContactEmail}`}
+                  >
+                    {privacyContactEmail}
+                  </Link>{" "}
+                  for questions or requests about an enquiry.
+                </p>
+              ) : (
+                <p style={policyCopy}>
+                  Until a direct business email is configured, use the {" "}
+                  <Link className="text-link" href="/contact">
+                    enquiry form
+                  </Link>{" "}
+                  and state that your message is a privacy request.
+                </p>
+              )}
+            </section>
+          </article>
         </div>
       </section>
     </>

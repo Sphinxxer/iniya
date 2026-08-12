@@ -1,7 +1,7 @@
 import { productSlugs } from "@/src/data/products";
 import {
   getConfiguredSiteUrl,
-  isVercelPreviewHost,
+  shouldIndexHost,
 } from "@/src/lib/metadata";
 
 function escapeXml(value: string) {
@@ -20,10 +20,9 @@ function escapeXml(value: string) {
 export function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const configuredSiteUrl = getConfiguredSiteUrl();
-  const isPreview =
-    isVercelPreviewHost(requestUrl.hostname) || !configuredSiteUrl;
+  const indexingEnabled = shouldIndexHost(requestUrl.host);
 
-  if (isPreview || !configuredSiteUrl) {
+  if (!indexingEnabled || !configuredSiteUrl) {
     return new Response("Sitemap is available on the production domain.", {
       status: 404,
       headers: {

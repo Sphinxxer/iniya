@@ -1,44 +1,66 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { CtaSection, PageHero } from "@/src/components/ui";
+import { FeatureIcon } from "@/src/components/feature-icon";
 import { createPageMetadata } from "@/src/lib/metadata";
 
-export const metadata: Metadata = createPageMetadata({
+export async function generateMetadata(): Promise<Metadata> {
+  return createPageMetadata({
   title: "Textile businesses we support",
   description:
     "Iniya Fiber supports open-end spinning units, textile manufacturers, and exporters with recycled materials, processed fibres, and yarn supply discussions.",
   path: "/industries",
-});
+  });
+}
 
 const audiences = [
   {
+    icon: "spinning",
     title: "Open-end spinning units",
-    products: "Recycled textile materials, processed fibres, and applicable yarn options.",
-    customisation:
-      "Share the material type, yarn count where applicable, grade, and quantity needed for the brief.",
-    enquiry:
-      "Include the selected product, material parameters, quantity with unit, and a business contact.",
-    consistency:
-      "In-house processing and internal quality review help keep the product discussion and supply planning coordinated.",
+    products: [
+      { label: "Recycled Cotton Hard Waste", slug: "recycled-cotton-hard-waste" },
+      { label: "Recycled Clipping Waste", slug: "recycled-clipping-waste" },
+      { label: "Processed Fibres", slug: "processed-fibres" },
+      { label: "Recycled Yarn", slug: "recycled-yarn" },
+    ],
+    startingPoint:
+      "Define the input material, grade, quantity, and yarn count where applicable.",
+    support:
+      "Review recycled inputs, processed fibres, or applicable yarn options around the intended spinning requirement.",
+    contactHref: "/contact?customerType=spinning-unit",
+    contactLabel: "Discuss a spinning requirement",
   },
   {
+    icon: "textileManufacturing",
     title: "Textile manufacturers",
-    products: "Processed fibres and yarn solutions, alongside the recycled material range.",
-    customisation:
-      "Discuss applicable fibre type, blend, colour, yarn count, grade, and quantity details.",
-    enquiry:
-      "Start with the product and include the parameters that apply to the intended material or yarn supply.",
-    consistency:
-      "The company’s in-house operations and own laboratory support a more controlled quality review process.",
+    products: [
+      { label: "Processed Fibres", slug: "processed-fibres" },
+      { label: "Cotton Yarn", slug: "cotton-yarn" },
+      { label: "Coloured Yarn", slug: "coloured-yarn" },
+      { label: "Poly-Cotton Yarn", slug: "poly-cotton-yarn" },
+    ],
+    startingPoint:
+      "Share the fibre, blend, colour, yarn count, grade, and quantity that apply to the selected product.",
+    support:
+      "Compare processed fibre and yarn options against the material requirement before the supply brief is agreed.",
+    contactHref: "/contact?customerType=textile-manufacturer",
+    contactLabel: "Discuss a manufacturing requirement",
   },
   {
+    icon: "exporter",
     title: "Exporters",
-    products: "The complete seven-product range of recycled materials, processed fibres, and yarns.",
-    customisation:
-      "Use the enquiry to establish the product, requested material details, and planned quantity clearly.",
-    enquiry:
-      "Include business name, country, business email, phone with country code, and the supply details needed for review.",
-    consistency:
-      "Clear specifications, in-house processing, and internal quality review support a dependable supply conversation.",
+    products: [
+      { label: "Recycled Cotton Hard Waste", slug: "recycled-cotton-hard-waste" },
+      { label: "Processed Fibres", slug: "processed-fibres" },
+      { label: "Recycled Yarn", slug: "recycled-yarn" },
+      { label: "Poly-Cotton Yarn", slug: "poly-cotton-yarn" },
+    ],
+    startingPoint:
+      "Establish the product specification, planned quantity, and business details for review.",
+    support:
+      "Build a clear product and supply brief before the applicable commercial details are agreed.",
+    contactHref: "/contact?customerType=exporter",
+    contactLabel: "Discuss an export requirement",
   },
 ] as const;
 
@@ -46,33 +68,48 @@ export default function IndustriesPage() {
   return (
     <>
       <PageHero
-        title="Supporting the businesses behind textile supply."
-        copy="Iniya Fiber serves the three confirmed customer groups with product-focused, specification-led supply discussions."
+        title="Buyers we support."
+        copy="Open-end spinning units, textile manufacturers, and exporters can begin with the products and material details relevant to their work."
       />
 
       <section className="section">
         <div className="shell audience-detail-list">
           {audiences.map((audience) => (
             <article className="audience-detail reveal" key={audience.title}>
-              <div>
+              <div className="audience-detail__heading">
+                <FeatureIcon name={audience.icon} size="industry" />
                 <h2>{audience.title}</h2>
               </div>
               <dl>
                 <div>
-                  <dt>Relevant product categories</dt>
-                  <dd>{audience.products}</dd>
+                  <dt>Relevant products</dt>
+                  <dd>
+                    {audience.products.map((product, index) => (
+                      <span key={product.slug}>
+                        {index > 0 ? ", " : null}
+                        <Link href={`/products/${product.slug}`}>
+                          {product.label}
+                        </Link>
+                      </span>
+                    ))}
+                  </dd>
                 </div>
                 <div>
-                  <dt>How customisation helps</dt>
-                  <dd>{audience.customisation}</dd>
+                  <dt>Where to begin</dt>
+                  <dd>{audience.startingPoint}</dd>
                 </div>
                 <div>
-                  <dt>What to include in an enquiry</dt>
-                  <dd>{audience.enquiry}</dd>
+                  <dt>How Iniya Fiber supports the brief</dt>
+                  <dd>{audience.support}</dd>
                 </div>
                 <div>
-                  <dt>Supporting supply consistency</dt>
-                  <dd>{audience.consistency}</dd>
+                  <dt>Next step</dt>
+                  <dd>
+                    <Link className="text-link" href={audience.contactHref}>
+                      {audience.contactLabel}{" "}
+                      <span aria-hidden="true">→</span>
+                    </Link>
+                  </dd>
                 </div>
               </dl>
             </article>

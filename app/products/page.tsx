@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import {
   getProductsInGroup,
   productGroups,
@@ -10,28 +11,45 @@ import {
   ProductCard,
 } from "@/src/components/ui";
 
-export const metadata: Metadata = createPageMetadata({
+export async function generateMetadata(): Promise<Metadata> {
+  return createPageMetadata({
   title: "Recycled materials, fibres and yarns",
   description:
     "Explore Iniya Fiber’s recycled textile materials, processed fibres, and yarn solutions for specification-led supply discussions.",
   path: "/products",
-});
+  });
+}
 
 export default function ProductsPage() {
   return (
     <>
       <PageHero
-        title="Recycled materials, processed fibres, and yarn solutions."
-        copy="Browse the seven product categories, then start an enquiry with the product, applicable specification, and quantity you need."
+        title="Recycled materials, processed fibres, and yarns."
+        copy="Explore seven focused products, then share the specification and quantity that apply to your requirement."
+        compact
+        aside={
+          <nav className="product-group-links" aria-label="Product categories">
+            {productGroups.map((group) => (
+              <Link className="text-link" href={`#${group.id}`} key={group.id}>
+                {group.label} <span aria-hidden="true">↓</span>
+              </Link>
+            ))}
+          </nav>
+        }
       />
 
-      <section className="section">
+      <section className="section section--line product-catalogue-section">
         <div className="shell">
           <div className="product-groups product-groups--index">
             {productGroups.map((group) => {
               const groupedProducts = getProductsInGroup(group.id);
               return (
-                <section className="product-group" key={group.id} aria-labelledby={`${group.id}-products-heading`}>
+                <section
+                  className="product-group"
+                  id={group.id}
+                  key={group.id}
+                  aria-labelledby={`${group.id}-products-heading`}
+                >
                   <div className="product-group__heading">
                     <h2 id={`${group.id}-products-heading`}>{group.label}</h2>
                     <p>{group.copy}</p>
@@ -51,18 +69,10 @@ export default function ProductsPage() {
               );
             })}
           </div>
-        </div>
-      </section>
-
-      <section className="section section--paper-deep">
-        <div className="shell product-index-note reveal">
-          <div>
-            <h2>Start with the product. Add the details that apply.</h2>
-            <p>
-              Each product page shows the relevant material parameters and the
-              information that helps Iniya Fiber review an enquiry clearly.
-            </p>
-          </div>
+          <p className="product-image-disclosure reveal" role="note">
+            Product imagery is illustrative; supply is confirmed against the
+            agreed specification.
+          </p>
         </div>
       </section>
 

@@ -37,6 +37,8 @@ const optionalText = (maximum: number) =>
     .optional()
     .transform((value) => value || undefined);
 
+const phonePattern = /^\+[1-9][0-9\s().-]{6,24}$/;
+
 const enquirySchema = z
   .object({
     fullName: z
@@ -55,21 +57,20 @@ const enquirySchema = z
       .email("Enter a valid business email address.")
       .max(254, "The email address is too long.")
       .transform((value) => value.toLowerCase()),
-    phone: z
-      .string()
-      .trim()
-      .regex(
-        /^\+[1-9][0-9\s().-]{6,24}$/,
-        "Include a country code, for example +91 98765 43210.",
-      ),
-    country: z
-      .string()
-      .trim()
-      .min(2, "Enter your country.")
-      .max(100, "The country name is too long."),
-    customerType: z.enum(customerTypes, {
-      error: "Choose a customer type.",
-    }),
+    phone: optionalText(30).refine(
+      (value) => !value || phonePattern.test(value),
+      "Include a country code, for example +91 98765 43210.",
+    ),
+    country: optionalText(100).refine(
+      (value) => !value || value.length >= 2,
+      "Enter a valid country name.",
+    ),
+    customerType: z
+      .union([z.enum(customerTypes), z.literal("")], {
+        error: "Choose a valid customer type.",
+      })
+      .optional()
+      .transform((value) => value || undefined),
     product: z.enum(productValues, {
       error: "Choose the product you require.",
     }),
@@ -146,9 +147,9 @@ function enquiryRows(enquiry: Enquiry): Array<[string, string]> {
     ["Full name", enquiry.fullName],
     ["Company", enquiry.companyName],
     ["Business email", enquiry.businessEmail],
-    ["Phone", enquiry.phone],
-    ["Country", enquiry.country],
-    ["Customer type", enquiry.customerType],
+    ["Phone", enquiry.phone ?? ""],
+    ["Country", enquiry.country ?? ""],
+    ["Customer type", enquiry.customerType ?? ""],
     ["Product", productLabels[enquiry.product]],
     ["Quantity", enquiry.quantity],
     ["Fibre type", enquiry.fibreType ?? ""],
@@ -296,6 +297,21 @@ export async function POST(request: Request): Promise<Response> {
 
   const turnstileSiteKey = configuredValue("NEXT_PUBLIC_TURNSTILE_SITE_KEY");
   const turnstileSecret = configuredValue("TURNSTILE_SECRET_KEY");
+  const indexingEnabled =
+    configuredValue("SITE_INDEXING_ENABLED")?.toLowerCase() === "true";
+  if (indexingEnabled && (!turnstileSiteKey || !turnstileSecret)) {
+    developmentWarning(
+      "Turnstile is required when site indexing is enabled; no enquiry email was sent.",
+    );
+    return json(
+      {
+        ok: false,
+        error:
+          "The enquiry service is temporarily unavailable. Please try again later.",
+      },
+      503,
+    );
+  }
   if (Boolean(turnstileSiteKey) !== Boolean(turnstileSecret)) {
     developmentWarning(
       "Turnstile is only partially configured; no enquiry email was sent.",

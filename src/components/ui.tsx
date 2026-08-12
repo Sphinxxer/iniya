@@ -1,6 +1,45 @@
 import Link from "next/link";
-import Image from "next/image";
 import type { ReactNode } from "react";
+import {
+  FeatureIcon,
+  type FeatureIconName,
+  type FeatureIconSize,
+} from "./feature-icon";
+
+export type IconFeature = {
+  icon: FeatureIconName;
+  title: string;
+  copy: string;
+};
+
+export function IconFeatureGrid({
+  items,
+  className,
+  iconSize = "feature",
+  numbered = false,
+}: {
+  items: readonly IconFeature[];
+  className: string;
+  iconSize?: FeatureIconSize;
+  numbered?: boolean;
+}) {
+  return (
+    <div className={`${className} icon-feature-grid reveal`}>
+      {items.map((item, index) => (
+        <article className="icon-feature-item" key={item.title}>
+          {numbered ? (
+            <span className="icon-feature-item__number">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+          ) : null}
+          <FeatureIcon name={item.icon} size={iconSize} />
+          <h3>{item.title}</h3>
+          <p>{item.copy}</p>
+        </article>
+      ))}
+    </div>
+  );
+}
 
 export function SectionHeading({
   title,
@@ -32,13 +71,15 @@ export function PageHero({
   title,
   copy,
   aside,
+  compact = false,
 }: {
   title: string;
   copy: string;
   aside?: ReactNode;
+  compact?: boolean;
 }) {
   return (
-    <section className="page-hero">
+    <section className={`page-hero${compact ? " page-hero--compact" : ""}`}>
       <div className="shell page-hero__grid">
         <div>
           <h1>{title}</h1>
@@ -107,30 +148,39 @@ export function CapabilityStrip() {
 export function ProcessFlow({ compact = false }: { compact?: boolean }) {
   const steps = [
     {
+      icon: "specification",
       title: "Customer specification",
-      copy: "Product, material parameters, and quantity are discussed.",
+      copy: "Discuss the product, applicable parameters, and quantity.",
     },
     {
+      icon: "processing",
       title: "In-house processing",
-      copy: "Applicable operations are planned and managed internally.",
+      copy: "Plan and manage the applicable operations internally.",
     },
     {
+      icon: "laboratory",
       title: "Laboratory testing",
-      copy: "Yarn checks are completed where they apply to the product.",
+      copy: "Check relevant yarn parameters where they apply.",
     },
     {
+      icon: "review",
       title: "Quality review",
-      copy: "The agreed specification is reviewed before release.",
+      copy: "Review the agreed specification before release.",
     },
     {
+      icon: "dispatch",
       title: "Supply and dispatch",
-      copy: "The order moves forward against the agreed supply details.",
+      copy: "Move the order against the agreed supply details.",
     },
-  ];
+  ] satisfies IconFeature[];
   return (
     <ol className={`process-flow reveal${compact ? " process-flow--compact" : ""}`}>
-      {steps.map((step) => (
+      {steps.map((step, index) => (
         <li key={step.title}>
+          <span className="process-flow__number">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+          <FeatureIcon name={step.icon} size="workflow" />
           <div className="process-flow__content">
             <strong>{step.title}</strong>
             <p>{step.copy}</p>
@@ -168,21 +218,32 @@ export function ProductVisual({
   image: string;
   large?: boolean;
 }) {
+  const responsiveSizes = large
+    ? "(max-width: 800px) 100vw, 50vw"
+    : "(max-width: 1100px) 100vw, 34vw";
+  const imageBase = image.endsWith(".webp") ? image.slice(0, -5) : image;
+
   return (
     <div className={`product-visual${large ? " product-visual--large" : ""}`}>
-      <Image
-        className="product-visual__image"
-        src={image}
-        alt={alt}
-        fill
-        sizes={
-          large
-            ? "(max-width: 800px) 100vw, 50vw"
-            : "(max-width: 1100px) 100vw, 34vw"
-        }
-        priority={large}
-        unoptimized
-      />
+      <picture>
+        <source
+          type="image/webp"
+          srcSet={`${imageBase}-640.webp 640w, ${imageBase}-960.webp 960w, ${imageBase}-1440.webp 1440w`}
+          sizes={responsiveSizes}
+        />
+        {/* These product assets are already resized and compressed at build time. */}
+        <img
+          className="product-visual__image"
+          src={image}
+          alt={alt}
+          width="1600"
+          height="1200"
+          sizes={responsiveSizes}
+          loading={large ? "eager" : "lazy"}
+          fetchPriority={large ? "high" : "auto"}
+          decoding="async"
+        />
+      </picture>
     </div>
   );
 }
@@ -203,26 +264,28 @@ export function ProductCard({
 }) {
   return (
     <article className={`product-card reveal${featured ? " is-featured" : ""}`}>
-      <Link href={`/products/${product.slug}`} aria-label={`View ${product.name}`}>
+      <Link
+        className="product-card__link"
+        href={`/products/${product.slug}`}
+        aria-label={`View ${product.name}`}
+      >
         <ProductVisual
           image={product.image}
           alt={product.imageAlt}
         />
-      </Link>
-      <div className="product-card__body">
-        <h3>
-          <Link href={`/products/${product.slug}`}>{product.name}</Link>
-        </h3>
-        <p>{product.shortDescription}</p>
-        <div className="product-card__meta">
-          <Link href={`/products/${product.slug}`}>
-            View <span aria-hidden="true">→</span>
-          </Link>
-          {product.countRange ? (
-            <span className="product-card__badge">{product.countRange}</span>
-          ) : null}
+        <div className="product-card__body">
+          <h3>{product.name}</h3>
+          <p>{product.shortDescription}</p>
+          <div className="product-card__meta">
+            <span className="product-card__action">
+              View <span aria-hidden="true">→</span>
+            </span>
+            {product.countRange ? (
+              <span className="product-card__badge">{product.countRange}</span>
+            ) : null}
+          </div>
         </div>
-      </div>
+      </Link>
     </article>
   );
 }

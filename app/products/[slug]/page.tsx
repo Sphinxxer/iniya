@@ -9,12 +9,18 @@ import {
   ProductVisual,
 } from "@/src/components/ui";
 import {
+  enquiryFieldGuidance,
   getProductBySlug,
   productGroups,
   productSlugs,
+  type CustomisationOption,
   type Product,
 } from "@/src/data/products";
-import { createPageMetadata, getConfiguredSiteUrl } from "@/src/lib/metadata";
+import {
+  createPageMetadata,
+  getConfiguredSiteUrl,
+  isCurrentRequestIndexable,
+} from "@/src/lib/metadata";
 
 type ProductPageProps = {
   params: Promise<{ slug: string }>;
@@ -53,11 +59,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
     .map((relatedSlug) => getProductBySlug(relatedSlug))
     .filter((item): item is Product => Boolean(item));
   const group = productGroups.find((item) => item.id === product.group);
-  const siteUrl = getConfiguredSiteUrl();
+  const siteUrl = (await isCurrentRequestIndexable())
+    ? getConfiguredSiteUrl()
+    : undefined;
   const productUrl = siteUrl
     ? new URL(`/products/${product.slug}`, siteUrl).toString()
     : undefined;
   const relatedHeading = `Related ${(group?.label ?? "products").toLowerCase()} to explore.`;
+  const whatToSpecify: readonly CustomisationOption[] = [
+    ...product.enquiryFields,
+    "Quantity",
+  ];
 
   const productSchema = {
     "@context": "https://schema.org",
@@ -103,9 +115,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <div className="shell">
           <Breadcrumbs
             items={[
-              { label: "Home", href: "/" },
               { label: "Products", href: "/products" },
-              { label: group?.label ?? product.category },
               { label: product.name },
             ]}
           />
@@ -114,12 +124,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <p className="eyebrow">{group?.label ?? product.category}</p>
               <h1>{product.name}</h1>
               <p>{product.longDescription}</p>
-              {product.countRange ? (
-                <div className="confirmed-range">
-                  <span>Available yarn count</span>
-                  <strong>{product.countRange}</strong>
-                </div>
-              ) : null}
               <Link
                 className="button"
                 href={`/contact?product=${encodeURIComponent(product.slug)}`}
@@ -136,47 +140,55 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </div>
       </section>
 
+      {product.confirmedSpecifications.length > 0 ? (
+        <section className="section section--line">
+          <div className="shell product-spec-grid">
+            <div>
+              <h2>Confirmed specifications.</h2>
+            </div>
+            <div className="specification-list">
+              {product.confirmedSpecifications.map((specification) => (
+                <div className="specification-row" key={specification.label}>
+                  <strong>{specification.label}</strong>
+                  <p>
+                    {specification.value} · {specification.context}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       <section className="section section--line">
         <div className="shell product-spec-grid">
           <div>
-            <h2>Applicable product details.</h2>
+            <h2>What to specify.</h2>
           </div>
           <div className="specification-list">
-            {product.specifications.map((specification) => (
-              <div className="specification-row" key={specification.label}>
-                <strong>{specification.label}</strong>
-                <p>{specification.copy}</p>
+            {whatToSpecify.map((field) => (
+              <div className="specification-row" key={field}>
+                <strong>{field}</strong>
+                <p>{enquiryFieldGuidance[field]}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="section section--paper-deep">
-        <div className="shell product-info-grid">
-          <article>
-            <h3>Internal quality review</h3>
-            <p>{product.qualityNote}</p>
-          </article>
-          <article>
-            <h3>Relevant customer groups</h3>
-            <ul>
-              {product.customerGroups.map((customerGroup) => (
-                <li key={customerGroup}>{customerGroup}</li>
-              ))}
-            </ul>
-          </article>
-          <article>
-            <h3>Include these details in your enquiry</h3>
-            <ul>
-              {product.enquiryFields.map((field) => (
-                <li key={field}>{field}</li>
-              ))}
-              <li>Quantity and unit</li>
-            </ul>
-          </article>
-        </div>
-      </section>
+      {product.qualityGuidance ? (
+        <section className="section section--paper-deep">
+          <div className="shell product-index-note reveal">
+            <div>
+              <h2>Quality checks for this yarn.</h2>
+              <p>{product.qualityGuidance}</p>
+              <Link className="text-link" href="/quality-capabilities">
+                View quality capabilities <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <section className="section related-products">
         <div className="shell">

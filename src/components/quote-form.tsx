@@ -43,6 +43,8 @@ const customerTypes = [
   "Other",
 ] as const;
 
+export type CustomerType = (typeof customerTypes)[number];
+
 const productOptions = [
   ...products.map((product) => ({
     value: product.slug,
@@ -57,7 +59,12 @@ const validProducts = new Set<string>(
 );
 
 const optionalSpecificationFields = [
-  { key: "fibreType", label: "Fibre type", maxLength: 120, placeholder: undefined },
+  {
+    key: "fibreType",
+    label: "Fibre type",
+    maxLength: 120,
+    placeholder: undefined,
+  },
   { key: "blend", label: "Blend", maxLength: 120, placeholder: undefined },
   { key: "colour", label: "Colour", maxLength: 120, placeholder: undefined },
   {
@@ -102,14 +109,17 @@ type ApiResponse = {
   fieldErrors?: Record<string, string>;
 };
 
-function initialValues(initialProduct?: ProductSlug): FormValues {
+function initialValues(
+  initialProduct?: ProductSlug,
+  initialCustomerType?: CustomerType,
+): FormValues {
   return {
     fullName: "",
     companyName: "",
     businessEmail: "",
     phone: "",
     country: "",
-    customerType: "",
+    customerType: initialCustomerType ?? "",
     product: initialProduct ?? "",
     quantity: "",
     details: "",
@@ -151,14 +161,17 @@ function validateForm(
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.businessEmail.trim())) {
     errors.businessEmail = "Enter a valid business email address.";
   }
-  if (!/^\+[1-9][0-9\s().-]{6,24}$/.test(values.phone.trim())) {
+  if (
+    values.phone.trim() &&
+    !/^\+[1-9][0-9\s().-]{6,24}$/.test(values.phone.trim())
+  ) {
     errors.phone = "Include a country code, for example +91 98765 43210.";
   }
-  if (values.country.trim().length < 2) {
-    errors.country = "Enter your country.";
+  if (values.country.trim() && values.country.trim().length < 2) {
+    errors.country = "Enter a valid country name.";
   }
-  if (!validCustomerTypes.has(values.customerType)) {
-    errors.customerType = "Choose a customer type.";
+  if (values.customerType && !validCustomerTypes.has(values.customerType)) {
+    errors.customerType = "Choose a valid customer type.";
   }
   if (!validProducts.has(values.product)) {
     errors.product = "Choose the product you require.";
@@ -207,26 +220,44 @@ function FieldError({
 
 export function QuoteForm({
   initialProduct,
+  initialCustomerType,
   turnstileSiteKey,
 }: {
   initialProduct?: ProductSlug;
+  initialCustomerType?: CustomerType;
   turnstileSiteKey?: string;
 }) {
   const [values, setValues] = useState<FormValues>(() =>
-    initialValues(initialProduct),
+    initialValues(initialProduct, initialCustomerType),
   );
   const [errors, setErrors] = useState<FormErrors>({});
   const [status, setStatus] = useState<SubmitStatus>("idle");
   const [formMessage, setFormMessage] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
+  const [specificationsOpen, setSpecificationsOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const successRef = useRef<HTMLDivElement>(null);
+  const errorSummaryRef = useRef<HTMLDivElement>(null);
   const turnstileContainerRef = useRef<HTMLDivElement>(null);
   const turnstileWidgetId = useRef<string | null>(null);
 
   useEffect(() => {
     if (status === "success") successRef.current?.focus();
   }, [status]);
+
+  useEffect(() => {
+    if (
+      status !== "error" ||
+      !formMessage ||
+      Object.keys(errors).length > 0
+    ) {
+      return;
+    }
+
+    const summary = errorSummaryRef.current;
+    summary?.focus({ preventScroll: true });
+    summary?.scrollIntoView({ block: "center" });
+  }, [errors, formMessage, status]);
 
   useEffect(() => {
     if (!turnstileSiteKey) return;
@@ -338,7 +369,6 @@ export function QuoteForm({
       });
       return next;
     });
-
     if (errors.product) {
       setErrors((current) => {
         const next = { ...current };
@@ -447,10 +477,11 @@ export function QuoteForm({
   }
 
   function startAnotherEnquiry() {
-    setValues(initialValues(initialProduct));
+    setValues(initialValues(initialProduct, initialCustomerType));
     setErrors({});
     setStatus("idle");
     setFormMessage("");
+    setSpecificationsOpen(false);
     resetTurnstile();
   }
 
@@ -461,24 +492,22 @@ export function QuoteForm({
       .filter(Boolean)
       .join(" ") || undefined;
   const visibleOptionalFields = getOptionalFieldsForProduct(values.product);
+  const selectedProductLabel =
+    values.product === "other"
+      ? "Other requirement"
+      : getProductBySlug(values.product)?.name;
 
   return (
-    <section className={styles.section} aria-labelledby="quote-form-heading">
+    <section className={styles.section} aria-labelledby="quote-page-heading">
       <div className={`shell ${styles.layout}`}>
-        <aside className={styles.intro}>
-          <p className={styles.kicker}>A clear brief helps us respond</p>
-          <h2 id="quote-form-heading">Request a tailored quote.</h2>
+        <header className={styles.intro}>
+          <p className={styles.kicker}>Textile supply enquiry</p>
+          <h1 id="quote-page-heading">Request a tailored quote.</h1>
           <p>
-            Tell us what material you need and the specification you are working
-            toward. Optional fibre, blend, colour, count, and grade details can
-            be included where they apply.
+            Share the product, quantity, and requirement. Add specification
+            details only when they are relevant to your brief.
           </p>
-          <ul className={styles.guide}>
-            <li>Choose the required product.</li>
-            <li>Share quantity and specification details.</li>
-            <li>Provide your business contact information.</li>
-          </ul>
-        </aside>
+        </header>
 
         {status === "success" ? (
           <div
@@ -491,7 +520,7 @@ export function QuoteForm({
               ✓
             </span>
             <p className={styles.statusLabel}>Enquiry sent</p>
-            <h3>Thank you for sharing your requirement.</h3>
+            <h2>Thank you for sharing your requirement.</h2>
             <p>{formMessage}</p>
             <button
               className={`button ${styles.secondaryButton}`}
@@ -512,7 +541,7 @@ export function QuoteForm({
             <div className={styles.formHeader}>
               <div>
                 <p className={styles.statusLabel}>Quote enquiry</p>
-                <h3>Production requirement</h3>
+                <h2>Production requirement</h2>
               </div>
               <p>
                 Fields marked <span aria-hidden="true">*</span> are required.
@@ -520,10 +549,146 @@ export function QuoteForm({
             </div>
 
             {status === "error" && formMessage ? (
-              <div className={styles.formAlert} role="alert">
+              <div
+                className={styles.formAlert}
+                ref={errorSummaryRef}
+                role="alert"
+                tabIndex={-1}
+              >
                 {formMessage}
               </div>
             ) : null}
+
+            {selectedProductLabel ? (
+              <div className={styles.selectedProduct} aria-live="polite">
+                <span>Selected product</span>
+                <strong>{selectedProductLabel}</strong>
+              </div>
+            ) : null}
+
+            <fieldset className={styles.fieldset}>
+              <legend>Requirement</legend>
+              <div className={styles.grid}>
+                <div className={styles.field}>
+                  <label htmlFor="quote-product">
+                    Product required <RequiredMarker />
+                  </label>
+                  <select
+                    className={`${controlClass("product")} ${styles.select}`}
+                    id="quote-product"
+                    name="product"
+                    value={values.product}
+                    onChange={(event) => updateProduct(event.target.value)}
+                    onBlur={() => validateField("product")}
+                    required
+                    aria-invalid={Boolean(errors.product)}
+                    aria-describedby={describedBy("product")}
+                  >
+                    <option value="">Select a product</option>
+                    {productOptions.map((product) => (
+                      <option key={product.value} value={product.value}>
+                        {product.label}
+                      </option>
+                    ))}
+                  </select>
+                  <FieldError field="product" errors={errors} />
+                </div>
+
+                <div className={styles.field}>
+                  <label htmlFor="quote-quantity">
+                    Quantity requirement <RequiredMarker />
+                  </label>
+                  <input
+                    className={controlClass("quantity")}
+                    id="quote-quantity"
+                    name="quantity"
+                    type="text"
+                    maxLength={160}
+                    placeholder="Share the amount and unit"
+                    value={values.quantity}
+                    onChange={(event) =>
+                      updateField("quantity", event.target.value)
+                    }
+                    onBlur={() => validateField("quantity")}
+                    required
+                    aria-invalid={Boolean(errors.quantity)}
+                    aria-describedby={describedBy("quantity")}
+                  />
+                  <FieldError field="quantity" errors={errors} />
+                </div>
+
+                <div className={`${styles.field} ${styles.fullWidth}`}>
+                  <label htmlFor="quote-details">
+                    Requirement details <RequiredMarker />
+                  </label>
+                  <textarea
+                    className={`${controlClass("details")} ${styles.textarea}`}
+                    id="quote-details"
+                    name="details"
+                    rows={5}
+                    maxLength={4000}
+                    placeholder="Describe the material, target specification, or other production requirements."
+                    value={values.details}
+                    onChange={(event) =>
+                      updateField("details", event.target.value)
+                    }
+                    onBlur={() => validateField("details")}
+                    required
+                    aria-invalid={Boolean(errors.details)}
+                    aria-describedby={describedBy("details")}
+                  />
+                  <FieldError field="details" errors={errors} />
+                </div>
+              </div>
+            </fieldset>
+
+            <details
+              className={styles.disclosure}
+              open={specificationsOpen}
+              onToggle={(event) =>
+                setSpecificationsOpen(event.currentTarget.open)
+              }
+            >
+              <summary>
+                <span>
+                  Optional product specifications
+                  <small>Include only what applies to your requirement</small>
+                </span>
+              </summary>
+              <div className={styles.disclosureBody}>
+                {visibleOptionalFields.length > 0 ? (
+                  <div className={styles.grid}>
+                    {visibleOptionalFields.map((field) => (
+                      <div className={styles.field} key={field.key}>
+                        <label htmlFor={`quote-${field.key}`}>
+                          {field.label}
+                        </label>
+                        <input
+                          className={styles.control}
+                          id={`quote-${field.key}`}
+                          name={field.key}
+                          type="text"
+                          maxLength={field.maxLength}
+                          placeholder={field.placeholder}
+                          value={values[field.key]}
+                          onChange={(event) =>
+                            updateField(
+                              field.key as OptionalSpecificationKey,
+                              event.target.value,
+                            )
+                          }
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className={styles.optionalNotice}>
+                    Select a product above to see the specification fields that
+                    apply to it.
+                  </p>
+                )}
+              </div>
+            </details>
 
             <fieldset className={styles.fieldset}>
               <legend>Business details</legend>
@@ -599,9 +764,7 @@ export function QuoteForm({
                 </div>
 
                 <div className={styles.field}>
-                  <label htmlFor="quote-phone">
-                    Phone number with country code <RequiredMarker />
-                  </label>
+                  <label htmlFor="quote-phone">Phone number (optional)</label>
                   <input
                     className={controlClass("phone")}
                     id="quote-phone"
@@ -616,7 +779,6 @@ export function QuoteForm({
                       updateField("phone", event.target.value)
                     }
                     onBlur={() => validateField("phone")}
-                    required
                     aria-invalid={Boolean(errors.phone)}
                     aria-describedby={describedBy(
                       "phone",
@@ -630,9 +792,7 @@ export function QuoteForm({
                 </div>
 
                 <div className={styles.field}>
-                  <label htmlFor="quote-country">
-                    Country <RequiredMarker />
-                  </label>
+                  <label htmlFor="quote-country">Country (optional)</label>
                   <input
                     className={controlClass("country")}
                     id="quote-country"
@@ -645,7 +805,6 @@ export function QuoteForm({
                       updateField("country", event.target.value)
                     }
                     onBlur={() => validateField("country")}
-                    required
                     aria-invalid={Boolean(errors.country)}
                     aria-describedby={describedBy("country")}
                   />
@@ -654,7 +813,7 @@ export function QuoteForm({
 
                 <div className={styles.field}>
                   <label htmlFor="quote-customerType">
-                    Customer type <RequiredMarker />
+                    Customer type (optional)
                   </label>
                   <select
                     className={`${controlClass("customerType")} ${styles.select}`}
@@ -665,7 +824,6 @@ export function QuoteForm({
                       updateField("customerType", event.target.value)
                     }
                     onBlur={() => validateField("customerType")}
-                    required
                     aria-invalid={Boolean(errors.customerType)}
                     aria-describedby={describedBy("customerType")}
                   >
@@ -679,117 +837,6 @@ export function QuoteForm({
                   <FieldError field="customerType" errors={errors} />
                 </div>
               </div>
-            </fieldset>
-
-            <fieldset className={styles.fieldset}>
-              <legend>Requirement details</legend>
-              <div className={styles.grid}>
-                <div className={styles.field}>
-                  <label htmlFor="quote-product">
-                    Product required <RequiredMarker />
-                  </label>
-                  <select
-                    className={`${controlClass("product")} ${styles.select}`}
-                    id="quote-product"
-                    name="product"
-                    value={values.product}
-                    onChange={(event) => updateProduct(event.target.value)}
-                    onBlur={() => validateField("product")}
-                    required
-                    aria-invalid={Boolean(errors.product)}
-                    aria-describedby={describedBy("product")}
-                  >
-                    <option value="">Select a product</option>
-                    {productOptions.map((product) => (
-                      <option key={product.value} value={product.value}>
-                        {product.label}
-                      </option>
-                    ))}
-                  </select>
-                  <FieldError field="product" errors={errors} />
-                </div>
-
-                <div className={styles.field}>
-                  <label htmlFor="quote-quantity">
-                    Quantity requirement <RequiredMarker />
-                  </label>
-                  <input
-                    className={controlClass("quantity")}
-                    id="quote-quantity"
-                    name="quantity"
-                    type="text"
-                    maxLength={160}
-                    placeholder="Share the amount and unit"
-                    value={values.quantity}
-                    onChange={(event) =>
-                      updateField("quantity", event.target.value)
-                    }
-                    onBlur={() => validateField("quantity")}
-                    required
-                    aria-invalid={Boolean(errors.quantity)}
-                    aria-describedby={describedBy("quantity")}
-                  />
-                  <FieldError field="quantity" errors={errors} />
-                </div>
-
-                <div className={`${styles.field} ${styles.fullWidth}`}>
-                  <label htmlFor="quote-details">
-                    Requirement details <RequiredMarker />
-                  </label>
-                  <textarea
-                    className={`${controlClass("details")} ${styles.textarea}`}
-                    id="quote-details"
-                    name="details"
-                    rows={6}
-                    maxLength={4000}
-                    placeholder="Describe the material, target specification, or other production requirements."
-                    value={values.details}
-                    onChange={(event) =>
-                      updateField("details", event.target.value)
-                    }
-                    onBlur={() => validateField("details")}
-                    required
-                    aria-invalid={Boolean(errors.details)}
-                    aria-describedby={describedBy("details")}
-                  />
-                  <FieldError field="details" errors={errors} />
-                </div>
-              </div>
-            </fieldset>
-
-            <fieldset className={styles.fieldset}>
-              <legend>
-                Relevant optional details <span>Include only what applies</span>
-              </legend>
-              {visibleOptionalFields.length > 0 ? (
-                <div className={styles.grid}>
-                  {visibleOptionalFields.map((field) => (
-                    <div className={styles.field} key={field.key}>
-                      <label htmlFor={`quote-${field.key}`}>{field.label}</label>
-                      <input
-                        className={styles.control}
-                        id={`quote-${field.key}`}
-                        name={field.key}
-                        type="text"
-                        maxLength={field.maxLength}
-                        placeholder={field.placeholder}
-                        value={values[field.key]}
-                        onChange={(event) =>
-                          updateField(
-                            field.key as OptionalSpecificationKey,
-                            event.target.value,
-                          )
-                        }
-                      />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className={styles.optionalNotice}>
-                  Select a product above to see the optional details that are
-                  relevant to it.
-                </p>
-              )}
             </fieldset>
 
             <div hidden aria-hidden="true">

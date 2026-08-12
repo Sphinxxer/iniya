@@ -6,49 +6,62 @@ import { createPageMetadata } from "@/src/lib/metadata";
 import {
   CapabilityStrip,
   CtaSection,
+  IconFeatureGrid,
   ProductCard,
   SectionHeading,
 } from "@/src/components/ui";
+import { FeatureIcon } from "@/src/components/feature-icon";
 
-export const metadata: Metadata = createPageMetadata({
+export async function generateMetadata(): Promise<Metadata> {
+  return createPageMetadata({
   title: "Iniya Fiber | Recycled Fibres & Yarn Manufacturer in Tirupur",
   description:
     "Iniya Fiber manufactures and supplies recycled textile materials, processed fibres, and yarn solutions from Tirupur for open-end spinning units, textile manufacturers, and exporters.",
   path: "/",
   absoluteTitle: true,
-});
+  });
+}
 
 const capabilityRows = [
-  ["Fibre type", "Custom"],
-  ["Blend", "Custom"],
-  ["Colour", "Custom"],
-  ["Yarn count", "6s–40s"],
-  ["Grade", "Custom"],
-  ["Quantity", "Order-based"],
+  { icon: "fibreType", label: "Fibre type", value: "Selected to requirement" },
+  { icon: "blend", label: "Blend", value: "Customised" },
+  { icon: "colour", label: "Colour", value: "Customised" },
+  {
+    icon: "yarnCount",
+    label: "Yarn count",
+    value: "6s–40s for applicable recycled yarn",
+  },
+  { icon: "grade", label: "Grade", value: "Requirement-based" },
+  { icon: "quantity", label: "Quantity", value: "Order-based" },
 ] as const;
 
-const customisationRows = [
-  ["Fibre type", "Select the material basis for the product discussion."],
-  ["Blend", "Share the requested blend where it applies."],
-  ["Colour", "Clarify the colour needed for the selected material or yarn."],
-  ["Yarn count", "Specify the requested count for applicable yarn products."],
-  ["Grade", "State the grade to be considered internally."],
-  ["Quantity", "Include the requested quantity and unit."],
+const coreCapabilities = [
+  {
+    icon: "processing",
+    title: "In-house processing",
+    copy: "Applicable fibre and yarn operations remain closely coordinated.",
+  },
+  {
+    icon: "specification",
+    title: "Custom specifications",
+    copy: "Material parameters are agreed against the selected product brief.",
+  },
+  {
+    icon: "laboratory",
+    title: "Own testing laboratory",
+    copy: "Yarn count, hank, and CSP checks support applicable yarn requirements.",
+  },
+  {
+    icon: "dispatch",
+    title: "Supply planning",
+    copy: "Quantity and dispatch details are aligned to the agreed requirement.",
+  },
 ] as const;
 
 const audiences = [
-  [
-    "Open-end spinning units",
-    "Begin with the material category, count where applicable, grade, and quantity needed for the spinning brief.",
-  ],
-  [
-    "Textile manufacturers",
-    "Share the fibre, blend, colour, count, grade, and quantity details that apply to the selected product.",
-  ],
-  [
-    "Exporters",
-    "Use the enquiry to establish the product, specification, quantity, and business contact details needed for a clear supply discussion.",
-  ],
+  { icon: "spinning", title: "Open-end spinning units", copy: "Start with the material, count where applicable, grade, and quantity." },
+  { icon: "textileManufacturing", title: "Textile manufacturers", copy: "Discuss the fibre, blend, colour, count, grade, and quantity that apply." },
+  { icon: "exporter", title: "Exporters", copy: "Establish the product, specification, quantity, and business details clearly." },
 ] as const;
 
 export default function Home() {
@@ -81,10 +94,16 @@ export default function Home() {
               <span>Product capabilities</span>
             </div>
             <dl>
-              {capabilityRows.map(([label, value], index) => (
-                <div key={label} style={{ "--row": index } as CSSProperties}>
-                  <dt>{label}</dt>
-                  <dd>{value}</dd>
+              {capabilityRows.map((row, index) => (
+                <div
+                  key={row.label}
+                  style={{ "--row": index } as CSSProperties}
+                >
+                  <dt>
+                    <FeatureIcon name={row.icon} size="small" />
+                    <span>{row.label}</span>
+                  </dt>
+                  <dd>{row.value}</dd>
                 </div>
               ))}
             </dl>
@@ -95,36 +114,11 @@ export default function Home() {
 
       <CapabilityStrip />
 
-      <section className="section company-intro">
-        <div className="shell company-intro__grid reveal">
-          <div>
-            <h2>Dependable material supply, kept close to the process.</h2>
-          </div>
-          <div className="company-intro__copy">
-            <p>
-              From recycled material and processed fibres to yarn solutions,
-              Iniya Fiber combines manufacturing, supply, trading, and export
-              support from Tirupur, India.
-            </p>
-            <p>
-              In-house processing and internal quality review support clearer
-              specifications, commercially focused supply discussions, and
-              dependable delivery planning.
-            </p>
-            <div className="role-list" aria-label="Business categories">
-              {["Manufacturer", "Supplier", "Trader", "Exporter"].map((role) => (
-                <span key={role}>{role}</span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section className="section section--line products-section">
         <div className="shell">
           <SectionHeading
-            title="Materials for textile supply discussions."
-            copy="Explore the seven focused product categories available for open-end spinning units, textile manufacturers, and exporters."
+            title="Recycled materials, processed fibres, and yarns."
+            copy="Explore seven product categories for open-end spinning units, textile manufacturers, and exporters."
             action={{ href: "/products", label: "View all products" }}
           />
           <div className="product-grid">
@@ -139,43 +133,17 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="section section--paper-deep">
+      <section className="section section--paper-deep why-section">
         <div className="shell">
           <SectionHeading
-            title="Customisation starts with the product brief."
-            copy="Applicable material parameters can be discussed across fibre type, blend, colour, yarn count, grade, and quantity."
-            action={{ href: "/contact", label: "Discuss a specification" }}
+            title="Capabilities kept close to the product brief."
+            copy="Processing, specification review, applicable testing, and supply planning are coordinated around the agreed requirement."
+            action={{
+              href: "/quality-capabilities",
+              label: "Explore quality capabilities",
+            }}
           />
-          <div className="specification-list reveal">
-            {customisationRows.map(([label, copy]) => (
-              <div className="specification-row" key={label}>
-                <strong>{label}</strong>
-                <p>{copy}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="section section--line">
-        <div className="shell">
-          <SectionHeading
-            title="Quality is checked in-house."
-            copy="Iniya Fiber operates its own testing laboratory, with yarn count, hank, and CSP checks used where they apply to yarn products."
-            action={{ href: "/quality-capabilities", label: "Explore quality capabilities" }}
-          />
-          <div className="metric-grid metric-grid--three reveal">
-            {[
-              ["Yarn count", "Checked to support alignment with the agreed yarn count specification."],
-              ["Hank", "Measured as part of the internal yarn quality-control process."],
-              ["CSP", "Checked to support yarn strength and performance assessment."],
-            ].map(([title, copy]) => (
-              <article className="metric" key={title}>
-                <h3>{title}</h3>
-                <p>{copy}</p>
-              </article>
-            ))}
-          </div>
+          <IconFeatureGrid items={coreCapabilities} className="why-grid" />
         </div>
       </section>
 
@@ -201,18 +169,15 @@ export default function Home() {
       <section className="section section--line">
         <div className="shell">
           <SectionHeading
-            title="Built for the businesses moving textile supply forward."
-            copy="Iniya Fiber supports the three confirmed customer groups with a clearer product, specification, and supply conversation."
-            action={{ href: "/industries", label: "Who we serve" }}
+            title="Built for textile supply businesses."
+            copy="Each buyer can begin with a relevant product and the material details needed for a focused supply discussion."
+            action={{ href: "/industries", label: "Buyers we support" }}
           />
-          <div className="industry-grid industry-grid--three reveal">
-            {audiences.map(([title, copy]) => (
-              <article className="industry-item" key={title}>
-                <h3>{title}</h3>
-                <p>{copy}</p>
-              </article>
-            ))}
-          </div>
+          <IconFeatureGrid
+            items={audiences}
+            className="industry-grid industry-grid--three"
+            iconSize="industry"
+          />
         </div>
       </section>
 

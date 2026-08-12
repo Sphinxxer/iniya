@@ -14,6 +14,11 @@ export type SiteConfig = {
   readonly streetAddress?: string;
   readonly googleMapsUrl?: string;
   readonly siteUrl?: string;
+  readonly privacyEffectiveDate?: string;
+  readonly privacyEmail?: string;
+  readonly privacyRetentionPeriod?: string;
+  readonly privacyServiceProviders: readonly string[];
+  readonly cookieAnalyticsStatement?: string;
   readonly socialAccounts: readonly SocialAccount[];
   readonly proposition: string;
   readonly description: string;
@@ -31,6 +36,11 @@ export const siteConfig = {
   streetAddress: "",
   googleMapsUrl: "",
   siteUrl: "",
+  privacyEffectiveDate: "",
+  privacyEmail: "",
+  privacyRetentionPeriod: "",
+  privacyServiceProviders: [],
+  cookieAnalyticsStatement: "",
   socialAccounts: [],
   proposition: "Fibres and yarns, made to your specification.",
   description:

@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { headers } from "next/headers";
 import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
 import { SiteFooter } from "@/src/components/site-footer";
@@ -10,7 +9,7 @@ import { siteConfig } from "@/src/config/site";
 import {
   getCanonicalUrl,
   getConfiguredSiteUrl,
-  isVercelPreviewHost,
+  isCurrentRequestIndexable,
 } from "@/src/lib/metadata";
 
 const inter = Inter({
@@ -33,17 +32,14 @@ export const viewport: Viewport = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const configuredSiteUrl = getConfiguredSiteUrl();
-  const requestHeaders = await headers();
-  const host =
-    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
-  const isPreview = isVercelPreviewHost(host);
+  const indexingEnabled = await isCurrentRequestIndexable();
   const title = "Iniya Fiber | Recycled Fibres & Yarn Manufacturer in Tirupur";
   const description =
     "Iniya Fiber manufactures and supplies recycled textile materials, processed fibres, and customised yarn solutions from Tirupur, India.";
-  const socialImage = configuredSiteUrl
+  const socialImage = indexingEnabled && configuredSiteUrl
     ? new URL("/og.png", configuredSiteUrl).toString()
     : undefined;
-  const canonical = getCanonicalUrl("/");
+  const canonical = indexingEnabled ? getCanonicalUrl("/") : undefined;
 
   return {
     metadataBase: configuredSiteUrl,
@@ -53,7 +49,9 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description,
     alternates: canonical ? { canonical } : undefined,
-    robots: isPreview ? { index: false, follow: false } : undefined,
+    robots: indexingEnabled
+      ? { index: true, follow: true }
+      : { index: false, follow: false },
     openGraph: {
       type: "website",
       siteName: siteConfig.companyName,
@@ -64,8 +62,8 @@ export async function generateMetadata(): Promise<Metadata> {
         ? [
             {
               url: socialImage,
-              width: 1536,
-              height: 1024,
+              width: 1200,
+              height: 630,
               alt: "Iniya Fiber — Fibres and yarns, made to your specification.",
             },
           ]
@@ -80,11 +78,12 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const indexingEnabled = await isCurrentRequestIndexable();
   const organizationData = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -110,7 +109,7 @@ export default function RootLayout({
     "@type": "WebSite",
     name: siteConfig.companyName,
     description: siteConfig.description,
-    ...(getConfiguredSiteUrl()
+    ...(indexingEnabled && getConfiguredSiteUrl()
       ? { url: getConfiguredSiteUrl()?.toString() }
       : {}),
   };

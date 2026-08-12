@@ -3,8 +3,10 @@ import { siteConfig } from "@/src/config/site";
 import { navigation } from "@/src/data/navigation";
 import { products } from "@/src/data/products";
 import { Brand } from "./brand";
+import { FeatureIcon, type FeatureIconName } from "./feature-icon";
 
 type ContactRow = {
+  icon: FeatureIconName;
   label: string;
   value: string;
   href: string;
@@ -15,6 +17,7 @@ export function SiteFooter() {
   const contactRows = [
     siteConfig.email
       ? {
+          icon: "email" as const,
           label: "Email",
           value: siteConfig.email,
           href: `mailto:${siteConfig.email}`,
@@ -22,6 +25,7 @@ export function SiteFooter() {
       : null,
     siteConfig.phone
       ? {
+          icon: "phone" as const,
           label: "Phone",
           value: siteConfig.phone,
           href: `tel:${siteConfig.phone}`,
@@ -29,6 +33,7 @@ export function SiteFooter() {
       : null,
     siteConfig.whatsapp && siteConfig.whatsappUrl
       ? {
+          icon: "whatsapp" as const,
           label: "WhatsApp",
           value: siteConfig.whatsapp,
           href: siteConfig.whatsappUrl,
@@ -75,18 +80,26 @@ export function SiteFooter() {
             <p className="eyebrow">Location</p>
             {siteConfig.googleMapsUrl ? (
               <a
+                className="site-footer__utility-link"
                 href={siteConfig.googleMapsUrl}
                 target="_blank"
                 rel="noreferrer"
               >
+                <FeatureIcon name="location" size="utility" />
                 {siteConfig.location} <span aria-hidden="true">↗</span>
               </a>
             ) : (
               <p>{siteConfig.location}</p>
             )}
-            {siteConfig.streetAddress ? <p>{siteConfig.streetAddress}</p> : null}
+            {siteConfig.streetAddress ? (
+              <p className="site-footer__utility-link">
+                <FeatureIcon name="location" size="utility" />
+                {siteConfig.streetAddress}
+              </p>
+            ) : null}
             {contactRows.map((row) => (
-              <a key={row.label} href={row.href}>
+              <a className="site-footer__utility-link" key={row.label} href={row.href}>
+                <FeatureIcon name={row.icon} size="utility" />
                 {row.value}
               </a>
             ))}

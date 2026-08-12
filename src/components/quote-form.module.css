@@ -1,12 +1,12 @@
 .section {
-  padding-block: var(--section-space);
+  padding: clamp(3.75rem, 6vw, 6rem) 0 var(--section-space);
   border-bottom: 1px solid var(--line);
 }
 
 .layout {
   display: grid;
   grid-template-columns: minmax(16rem, 0.62fr) minmax(0, 1.38fr);
-  gap: clamp(3rem, 8vw, 9rem);
+  gap: clamp(3rem, 7vw, 7rem);
   align-items: start;
 }
 
@@ -39,31 +39,17 @@
   content: "";
 }
 
-.intro h2 {
-  max-width: 9ch;
+.intro h1 {
+  max-width: 10ch;
   margin-bottom: 1.6rem;
-  font-size: clamp(2.5rem, 4.8vw, 5.3rem);
+  font-size: clamp(3.2rem, 5.8vw, 6.5rem);
 }
 
 .intro > p:not(.kicker) {
   max-width: 34rem;
-  margin-bottom: 2.5rem;
+  margin-bottom: 0;
   color: var(--ink-soft);
   font-size: clamp(1rem, 1.2vw, 1.15rem);
-}
-
-.guide {
-  margin: 0;
-  padding: 0;
-  border-top: 1px solid var(--line);
-  list-style: none;
-}
-
-.guide li {
-  padding: 1rem 0;
-  border-bottom: 1px solid var(--line);
-  color: var(--ink-soft);
-  font-size: 0.9rem;
 }
 
 .form,
@@ -81,8 +67,8 @@
   border-bottom: 1px solid var(--line);
 }
 
-.formHeader h3,
-.success h3 {
+.formHeader h2,
+.success h2 {
   margin: 0;
   font-size: clamp(1.8rem, 3vw, 3rem);
 }
@@ -106,6 +92,81 @@
   padding: 2.5rem 0;
   border: 0;
   border-bottom: 1px solid var(--line);
+}
+
+.selectedProduct {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  padding: 1rem 1.1rem;
+  border-left: 3px solid var(--orange);
+  background: color-mix(in srgb, var(--paper-deep) 65%, transparent);
+}
+
+.selectedProduct span {
+  color: var(--ink-soft);
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.selectedProduct strong {
+  font-family: var(--font-manrope), Arial, sans-serif;
+  font-size: 1rem;
+  text-align: right;
+}
+
+.disclosure {
+  border-bottom: 1px solid var(--line);
+}
+
+.disclosure summary {
+  display: flex;
+  min-height: 5.5rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.5rem 0;
+  cursor: pointer;
+  font-family: var(--font-manrope), Arial, sans-serif;
+  font-size: 1.2rem;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  list-style: none;
+}
+
+.disclosure summary::-webkit-details-marker {
+  display: none;
+}
+
+.disclosure summary::after {
+  color: var(--orange-dark);
+  content: "+";
+  font-family: var(--font-inter), Arial, sans-serif;
+  font-size: 1.4rem;
+  font-weight: 500;
+}
+
+.disclosure[open] summary::after {
+  content: "−";
+}
+
+.disclosure summary small {
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--ink-soft);
+  font-family: var(--font-inter), Arial, sans-serif;
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.disclosureBody {
+  padding: 0.25rem 0 2.5rem;
 }
 
 .fieldset legend {
@@ -226,6 +287,11 @@
   font-size: 0.9rem;
 }
 
+.formAlert:focus {
+  outline: 3px solid var(--orange);
+  outline-offset: 3px;
+}
+
 .consentField {
   display: grid;
   grid-template-columns: 1.35rem 1fr;
@@ -328,19 +394,15 @@
 @media (max-width: 900px) {
   .layout {
     grid-template-columns: 1fr;
-    gap: 4rem;
+    gap: 2.75rem;
   }
 
   .intro {
     position: static;
   }
 
-  .intro h2 {
+  .intro h1 {
     max-width: 12ch;
-  }
-
-  .guide {
-    max-width: 38rem;
   }
 }
 
@@ -362,6 +424,16 @@
   .formHeader > p,
   .submitRow p {
     max-width: none;
+    text-align: left;
+  }
+
+  .selectedProduct {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .selectedProduct strong {
     text-align: left;
   }
 
