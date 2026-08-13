@@ -87,9 +87,7 @@ export default function IndustriesPage() {
                     {audience.products.map((product, index) => (
                       <span key={product.slug}>
                         {index > 0 ? ", " : null}
-                        <Link href={`/products/${product.slug}`}>
-                          {product.label}
-                        </Link>
+                        {product.label}
                       </span>
                     ))}
                   </dd>

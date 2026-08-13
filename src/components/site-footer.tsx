@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { siteConfig } from "@/src/config/site";
 import { navigation } from "@/src/data/navigation";
-import { products } from "@/src/data/products";
 import { Brand } from "./brand";
 import { FeatureIcon, type FeatureIconName } from "./feature-icon";
 
@@ -69,11 +68,7 @@ export function SiteFooter() {
           <div>
             <p className="eyebrow">Products</p>
             <nav aria-label="Product navigation">
-              {products.map((product) => (
-                <Link key={product.slug} href={`/products/${product.slug}`}>
-                  {product.name}
-                </Link>
-              ))}
+              <Link href="/products">Product catalogue</Link>
             </nav>
           </div>
           <div>

@@ -1,4 +1,3 @@
-import { productSlugs } from "@/src/data/products";
 import {
   getConfiguredSiteUrl,
   shouldIndexHost,
@@ -36,7 +35,6 @@ export function GET(request: Request) {
     "/",
     "/about",
     "/products",
-    ...productSlugs.map((slug) => `/products/${slug}`),
     "/quality-capabilities",
     "/industries",
     "/contact",

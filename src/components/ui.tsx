@@ -251,41 +251,31 @@ export function ProductVisual({
 export function ProductCard({
   product,
   featured = false,
+  catalogue = false,
 }: {
   product: {
     name: string;
-    slug: string;
     shortDescription: string;
+    catalogueDescription: string;
     image: string;
     imageAlt: string;
     countRange?: string;
   };
   featured?: boolean;
+  catalogue?: boolean;
 }) {
   return (
     <article className={`product-card reveal${featured ? " is-featured" : ""}`}>
-      <Link
-        className="product-card__link"
-        href={`/products/${product.slug}`}
-        aria-label={`View ${product.name}`}
-      >
-        <ProductVisual
-          image={product.image}
-          alt={product.imageAlt}
-        />
-        <div className="product-card__body">
-          <h3>{product.name}</h3>
-          <p>{product.shortDescription}</p>
-          <div className="product-card__meta">
-            <span className="product-card__action">
-              View <span aria-hidden="true">→</span>
-            </span>
-            {product.countRange ? (
-              <span className="product-card__badge">{product.countRange}</span>
-            ) : null}
+      <ProductVisual image={product.image} alt={product.imageAlt} />
+      <div className="product-card__body">
+        <h3>{product.name}</h3>
+        <p>{catalogue ? product.catalogueDescription : product.shortDescription}</p>
+        {product.countRange ? (
+          <div className="product-card__meta product-card__meta--detail">
+            <span className="product-card__badge">{product.countRange}</span>
           </div>
-        </div>
-      </Link>
+        ) : null}
+      </div>
     </article>
   );
 }

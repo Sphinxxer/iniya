@@ -62,6 +62,7 @@ export default function ProductsPage() {
                         key={product.slug}
                         product={product}
                         featured={product.priority === 1}
+                        catalogue
                       />
                     ))}
                   </div>
@@ -78,7 +79,7 @@ export default function ProductsPage() {
 
       <CtaSection
         title="Need help selecting the right product?"
-        copy="Tell us what you need to source, the material details that apply, and the quantity you are planning for."
+        copy="Tell us the material you need, the relevant specifications, and your planned quantity."
       />
     </>
   );
